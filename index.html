@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIB3+ Engine - Unified Visualization System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 100%);
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background: rgba(26, 26, 46, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 1.5rem;
+            border-bottom: 2px solid #00ffcc;
+            box-shadow: 0 4px 20px rgba(0, 255, 204, 0.2);
+        }
+
+        h1 {
+            font-size: 2rem;
+            background: linear-gradient(135deg, #00ffcc, #0099ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        main {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 1rem;
+            padding: 1rem;
+            overflow: hidden;
+        }
+
+        .controls {
+            background: rgba(26, 26, 46, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid #00ffcc44;
+            border-radius: 12px;
+            padding: 1.5rem;
+            overflow-y: auto;
+            max-height: calc(100vh - 140px);
+        }
+
+        .control-group {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #00ffcc22;
+        }
+
+        .control-group h3 {
+            color: #00ffcc;
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button {
+            width: 100%;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #00ffcc22, #0099ff22);
+            border: 1px solid #00ffcc;
+            color: #00ffcc;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #00ffcc44, #0099ff44);
+            box-shadow: 0 0 20px rgba(0, 255, 204, 0.3);
+            transform: translateY(-2px);
+        }
+
+        button.active {
+            background: linear-gradient(135deg, #00ffcc, #0099ff);
+            color: #000;
+        }
+
+        select {
+            width: 100%;
+            padding: 0.5rem;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #00ffcc44;
+            color: #e0e0e0;
+            border-radius: 6px;
+            margin-bottom: 0.5rem;
+        }
+
+        .slider-control {
+            margin-bottom: 1rem;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.3rem;
+            font-size: 0.85rem;
+            color: #aaa;
+        }
+
+        .slider-value {
+            color: #00ffcc;
+            font-weight: bold;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background: rgba(0, 255, 204, 0.2);
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            background: #00ffcc;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            background: #00ffcc;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+            border: none;
+        }
+
+        .canvas-container {
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid #00ffcc44;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            min-height: 600px;
+        }
+
+        #vib3-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .status {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            border: 1px solid #00ffcc44;
+            font-size: 0.85rem;
+        }
+
+        .status.ready {
+            border-color: #00ff88;
+            color: #00ff88;
+        }
+
+        .system-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            border: 2px solid #00ffcc;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #00ffcc;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🌟 VIB3+ Engine</h1>
+        <p class="subtitle">Unified Quantum/Faceted/Holographic Visualization • 24 Geometries • 6D Rotation</p>
+    </header>
+
+    <main>
+        <div class="controls">
+            <div class="control-group">
+                <h3>System Selection</h3>
+                <button id="btnQuantum" class="system-btn active" data-system="quantum">🌌 Quantum Engine</button>
+                <button id="btnFaceted" class="system-btn" data-system="faceted">🔷 Faceted System</button>
+                <button id="btnHolographic" class="system-btn" data-system="holographic">🌈 Holographic System</button>
+            </div>
+
+            <div class="control-group">
+                <h3>Geometry (24 Variants)</h3>
+                <select id="geometrySelect">
+                    <!-- Populated by JavaScript -->
+                </select>
+            </div>
+
+            <div class="control-group">
+                <h3>6D Rotation (All Planes)</h3>
+                <div class="slider-control">
+                    <div class="slider-label">
+                        <span>XY Plane</span>
+                        <span class="slider-value" id="rot4dXYValue">0.0</span>
+                    </div>
+                    <input type="range" id="rot4dXY" min="0" max="6.28" step="0.1" value="0">
+                </div>
+                <div class="slider-control">
+                    <div class="slider-label">
+                        <span>XZ Plane</span>
+                        <span class="slider-value" id="rot4dXZValue">0.0</span>
+                    </div>
+                    <input type="range" id="rot4dXZ" min="0" max="6.28" step="0.1" value="0">
+                </div>
+                <div class="slider-control">
+                    <div class="slider-label">
+                        <span>YZ Plane</span>
+                        <span class="slider-value" id="rot4dYZValue">0.0</span>
+                    </div>
+                    <input type="range" id="rot4dYZ" min="0" max="6.28" step="0.1" value="0">
+                </div>
+                <div class="slider-control">
+                    <div class="slider-label">
+                        <span>XW Plane</span>
+                        <span class="slider-value" id="rot4dXWValue">0.0</span>
+                    </div>
+                    <input type="range" id="rot4dXW" min="0" max="6.28" step="0.1" value="0">
+                </div>
+                <div class="slider-control">
+                    <div class="slider-label">
+                        <span>YW Plane</span>
+                        <span class="slider-value" id="rot4dYWValue">0.0</span>
+                    </div>
+                    <input type="range" id="rot4dYW" min="0" max="6.28" step="0.1" value="0">
+                </div>
+                <div class="slider-control">
+                    <div class="slider-label">
+                        <span>ZW Plane</span>
+                        <span class="slider-value" id="rot4dZWValue">0.0</span>
+                    </div>
+                    <input type="range" id="rot4dZW" min="0" max="6.28" step="0.1" value="0">
+                </div>
+                <button id="randomizeRotation">🎲 Randomize Rotations</button>
+            </div>
+
+            <div class="control-group">
+                <h3>Visual Properties</h3>
+                <div class="slider-control">
+                    <div class="slider-label">
+                        <span>Grid Density</span>
+                        <span class="slider-value" id="gridDensityValue">15</span>
+                    </div>
+                    <input type="range" id="gridDensity" min="4" max="100" step="1" value="15">
+                </div>
+                <div class="slider-control">
+                    <div class="slider-label">
+                        <span>Hue</span>
+                        <span class="slider-value" id="hueValue">200</span>
+                    </div>
+                    <input type="range" id="hue" min="0" max="360" step="1" value="200">
+                </div>
+                <div class="slider-control">
+                    <div class="slider-label">
+                        <span>Speed</span>
+                        <span class="slider-value" id="speedValue">1.0</span>
+                    </div>
+                    <input type="range" id="speed" min="0.1" max="3" step="0.1" value="1.0">
+                </div>
+            </div>
+
+            <div class="control-group">
+                <button id="randomizeAll">🎲 Randomize All</button>
+                <button id="resetAll">🔄 Reset All</button>
+            </div>
+        </div>
+
+        <div class="canvas-container">
+            <div id="vib3-container"></div>
+            <div class="status ready" id="status">VIB3+ Engine Ready</div>
+            <div class="system-badge" id="systemBadge">🌌 QUANTUM</div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { VIB3Engine } from './src/core/VIB3Engine.js';
+
+        // Initialize engine
+        const engine = new VIB3Engine();
+        await engine.initialize('vib3-container');
+
+        // Populate geometry dropdown
+        const geometrySelect = document.getElementById('geometrySelect');
+        engine.getGeometryNames().forEach((name, index) => {
+            const option = document.createElement('option');
+            option.value = index;
+            option.textContent = `${index}: ${name}`;
+            geometrySelect.appendChild(option);
+        });
+
+        // System switching
+        document.querySelectorAll('.system-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const system = btn.dataset.system;
+                await engine.switchSystem(system);
+
+                document.querySelectorAll('.system-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+
+                const badges = {
+                    quantum: '🌌 QUANTUM',
+                    faceted: '🔷 FACETED',
+                    holographic: '🌈 HOLOGRAPHIC'
+                };
+                document.getElementById('systemBadge').textContent = badges[system];
+            });
+        });
+
+        // Parameter controls
+        const sliders = {
+            rot4dXY: document.getElementById('rot4dXY'),
+            rot4dXZ: document.getElementById('rot4dXZ'),
+            rot4dYZ: document.getElementById('rot4dYZ'),
+            rot4dXW: document.getElementById('rot4dXW'),
+            rot4dYW: document.getElementById('rot4dYW'),
+            rot4dZW: document.getElementById('rot4dZW'),
+            gridDensity: document.getElementById('gridDensity'),
+            hue: document.getElementById('hue'),
+            speed: document.getElementById('speed')
+        };
+
+        Object.entries(sliders).forEach(([param, slider]) => {
+            const valueDisplay = document.getElementById(`${param}Value`);
+            slider.addEventListener('input', () => {
+                valueDisplay.textContent = slider.value;
+                engine.setParameter(param, parseFloat(slider.value));
+            });
+        });
+
+        geometrySelect.addEventListener('change', () => {
+            engine.setParameter('geometry', parseInt(geometrySelect.value));
+        });
+
+        // Randomize buttons
+        document.getElementById('randomizeRotation').addEventListener('click', () => {
+            Object.entries(sliders).forEach(([param, slider]) => {
+                if (param.startsWith('rot4d')) {
+                    const value = (Math.random() * 6.28).toFixed(1);
+                    slider.value = value;
+                    document.getElementById(`${param}Value`).textContent = value;
+                    engine.setParameter(param, parseFloat(value));
+                }
+            });
+        });
+
+        document.getElementById('randomizeAll').addEventListener('click', () => {
+            engine.randomizeAll();
+            // Update UI to reflect new values
+            const params = engine.getAllParameters();
+            Object.entries(sliders).forEach(([param, slider]) => {
+                if (params[param] !== undefined) {
+                    slider.value = params[param];
+                    document.getElementById(`${param}Value`).textContent = params[param].toFixed(1);
+                }
+            });
+            geometrySelect.value = params.geometry;
+        });
+
+        document.getElementById('resetAll').addEventListener('click', () => {
+            engine.resetAll();
+            // Update UI
+            const params = engine.getAllParameters();
+            Object.entries(sliders).forEach(([param, slider]) => {
+                if (params[param] !== undefined) {
+                    slider.value = params[param];
+                    document.getElementById(`${param}Value`).textContent = params[param].toFixed(1);
+                }
+            });
+            geometrySelect.value = params.geometry;
+        });
+
+        console.log('%c🌟 VIB3+ Engine Ready', 'color: #00ffcc; font-size: 20px; font-weight: bold;');
+        console.log('3 Systems: Quantum, Faceted, Holographic');
+        console.log('24 Geometries per system');
+        console.log('Full 6D Rotation (XY, XZ, YZ, XW, YW, ZW)');
+    </script>
+</body>
+</html>
