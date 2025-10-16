@@ -1,0 +1,120 @@
+{
+  "name": "vib34d-xr-quaternion-sdk",
+  "version": "1.0.0",
+  "description": "4D Geometric Processing with XR Quaternion Integration - Advanced quaternion mathematics and spatial computing for OpenXR/WebXR",
+  "type": "module",
+  "main": "src/core/AdaptiveSDK.js",
+  "types": "./types/adaptive-sdk.d.ts",
+  "exports": {
+    ".": {
+      "types": "./types/adaptive-sdk.d.ts",
+      "default": "./src/core/AdaptiveSDK.js"
+    },
+    "./quaternion": "./src/ui/adaptive/renderers/ShaderQuaternionSynchronizer.js",
+    "./sensors": "./src/ui/adaptive/SensoryInputBridge.js",
+    "./polychora": "./src/core/PolychoraSystem.js",
+    "./geometry": "./src/geometry/GeometryLibrary.js",
+    "./core/quaternion": {
+      "types": "./src/core/quaternion/index.ts",
+      "default": "./src/core/quaternion/index.ts"
+    },
+    "./core/quaternion/poseSchema": {
+      "types": "./src/core/quaternion/poseSchema.ts",
+      "default": "./src/core/quaternion/poseSchema.ts"
+    },
+    "./core/quaternion/registry": {
+      "types": "./src/core/quaternion/registry.ts",
+      "default": "./src/core/quaternion/registry.ts"
+    },
+    "./ui/adaptive/renderers/webgpu": {
+      "types": "./src/ui/adaptive/renderers/webgpu/index.ts",
+      "default": "./src/ui/adaptive/renderers/webgpu/index.ts"
+    },
+    "./ui/adaptive/renderers/pose-registry": {
+      "types": "./src/ui/adaptive/renderers/QuaternionPoseRegistrySynchronizer.ts",
+      "default": "./src/ui/adaptive/renderers/QuaternionPoseRegistrySynchronizer.ts"
+    },
+    "./ui/adaptive/renderers/pose-monitor": {
+      "types": "./src/ui/adaptive/renderers/PoseReliabilityMonitor.ts",
+      "default": "./src/ui/adaptive/renderers/PoseReliabilityMonitor.ts"
+    },
+    "./ui/adaptive/renderers/pose-confidence": {
+      "types": "./src/ui/adaptive/renderers/poseConfidence.ts",
+      "default": "./src/ui/adaptive/renderers/poseConfidence.ts"
+    },
+    "./ui/adaptive/localization": {
+      "types": "./src/ui/adaptive/localization/index.ts",
+      "default": "./src/ui/adaptive/localization/index.ts"
+    },
+    "./product/telemetry/facade": {
+      "types": "./types/product/telemetry/createTelemetryFacade.d.ts",
+      "default": "./src/product/telemetry/createTelemetryFacade.js"
+    },
+    "./product/telemetry/reference-providers": {
+      "types": "./types/product/telemetry/referenceTelemetryProviders.d.ts",
+      "default": "./src/product/telemetry/providers/referenceTelemetryProviders.js"
+    }
+  },
+  "keywords": [
+    "quaternion",
+    "4d",
+    "xr",
+    "openxr",
+    "webxr",
+    "spatial-computing",
+    "polytope",
+    "tesseract",
+    "geometric-processing",
+    "ar",
+    "vr",
+    "mixed-reality"
+  ],
+  "author": {
+    "name": "Paul Phillips",
+    "email": "Paul@clearseassolutions.com",
+    "url": "https://parserator.com"
+  },
+  "license": "SEE LICENSE IN DOCS/LICENSE_ATTESTATION_PROFILE_CATALOG.md",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Domusgpt/vib34d-xr-quaternion-sdk.git"
+  },
+  "engines": {
+    "node": ">=18.19.0"
+  },
+  "scripts": {
+    "dev:web": "vite --open",
+    "build:web": "vite build",
+    "lint": "eslint \"src/**/*.{js,ts}\"",
+    "test": "vitest run",
+    "bench": "vitest bench",
+    "analyze:bundle": "vite build --mode analyze",
+    "check:bundle": "pnpm exec vite build --outDir dist-ci --emptyOutDir && node tools/ci/bundleSizeCheck.mjs dist-ci --cleanup",
+    "codegen:localization": "tsx tools/codegen/localization-quaternions.ts",
+    "storybook": "storybook dev -p 6006",
+    "build:storybook": "storybook build"
+  },
+  "packageManager": "pnpm@9.4.0",
+  "files": [
+    "src/",
+    "types/",
+    "DOCS/",
+    "README.md"
+  ],
+  "dependencies": {
+    "ajv": "^8.17.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.9",
+    "@vitest/coverage-v8": "^1.6.1",
+    "@storybook/addon-essentials": "^8.1.6",
+    "@storybook/addon-interactions": "^8.1.6",
+    "@storybook/html-vite": "^8.1.6",
+    "eslint": "^9.6.0",
+    "storybook": "^8.1.6",
+    "typescript": "^5.5.3",
+    "vite": "^5.3.3",
+    "vitest": "^1.6.0",
+    "tsx": "^4.15.7"
+  }
+}
