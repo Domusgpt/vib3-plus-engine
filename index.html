@@ -197,6 +197,265 @@
             font-weight: bold;
             color: #00ffcc;
         }
+
+        /* Gallery Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            overflow: auto;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a1a2e 0%, #0a0a1a 100%);
+            border: 2px solid #00ffcc;
+            border-radius: 16px;
+            max-width: 95%;
+            max-height: 95%;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .gallery-header {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 1.5rem;
+            border-bottom: 2px solid #00ffcc;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .gallery-header h2 {
+            margin: 0;
+            color: #00ffcc;
+            font-size: 1.5rem;
+        }
+
+        .gallery-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .gallery-controls button {
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, #00ffcc22, #0099ff22);
+            border: 1px solid #00ffcc;
+            color: #00ffcc;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .gallery-controls button:hover {
+            background: linear-gradient(135deg, #00ffcc44, #0099ff44);
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
+        }
+
+        .gallery-controls button.active {
+            background: linear-gradient(135deg, #00ffcc, #0099ff);
+            color: #000;
+        }
+
+        .gallery-body {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .gallery-sidebar {
+            width: 320px;
+            background: rgba(0, 0, 0, 0.3);
+            border-right: 1px solid #00ffcc44;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .preview-container {
+            margin-bottom: 1rem;
+        }
+
+        #galleryPreviewCanvas {
+            width: 100%;
+            border: 2px solid #00ffcc44;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .preview-info {
+            font-size: 0.9rem;
+        }
+
+        .preview-title {
+            color: #00ffcc;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .preview-system {
+            color: #0099ff;
+            margin-bottom: 0.3rem;
+        }
+
+        .preview-details {
+            color: #aaa;
+            font-size: 0.85rem;
+        }
+
+        .preview-details div {
+            margin-bottom: 0.2rem;
+        }
+
+        .gallery-stats {
+            border-top: 1px solid #00ffcc44;
+            padding-top: 1rem;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .stat-label {
+            color: #888;
+        }
+
+        .stat-value {
+            color: #00ffcc;
+            font-weight: bold;
+        }
+
+        .gallery-grid-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        .gallery-section {
+            margin-bottom: 2rem;
+        }
+
+        .geometry-header {
+            color: #00ffcc;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #00ffcc44;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .gallery-thumbnail {
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid #00ffcc44;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .gallery-thumbnail:hover {
+            border-color: #00ffcc;
+            box-shadow: 0 0 20px rgba(0, 255, 204, 0.3);
+            transform: translateY(-4px);
+        }
+
+        .gallery-thumbnail.current {
+            border-color: #00ff88;
+            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
+        }
+
+        .gallery-thumbnail.empty-slot {
+            border-style: dashed;
+            opacity: 0.5;
+        }
+
+        .gallery-thumbnail.empty-slot:hover {
+            opacity: 1;
+        }
+
+        .thumbnail-preview {
+            position: relative;
+            aspect-ratio: 1;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .variation-number {
+            position: absolute;
+            top: 0.5rem;
+            left: 0.5rem;
+            background: rgba(0, 0, 0, 0.8);
+            color: #00ffcc;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .system-badge {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            font-size: 1.2rem;
+        }
+
+        .empty-indicator {
+            font-size: 3rem;
+            color: #00ffcc44;
+        }
+
+        .thumbnail-info {
+            padding: 0.5rem;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .variation-name {
+            color: #e0e0e0;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-bottom: 0.2rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .variation-type {
+            color: #888;
+            font-size: 0.75rem;
+        }
+
+        .close-btn {
+            background: none !important;
+            border: none !important;
+            color: #ff6666 !important;
+            font-size: 2rem !important;
+            line-height: 1 !important;
+            padding: 0 0.5rem !important;
+        }
+
+        .close-btn:hover {
+            color: #ff0000 !important;
+        }
     </style>
 </head>
 <body>
@@ -296,6 +555,8 @@
             <div class="control-group">
                 <button id="randomizeAll">🎲 Randomize All</button>
                 <button id="resetAll">🔄 Reset All</button>
+                <button id="openGallery">🖼️ Open Gallery</button>
+                <button id="saveToGallery">💾 Save Current</button>
             </div>
         </div>
 
@@ -308,10 +569,21 @@
 
     <script type="module">
         import { VIB3Engine } from './src/core/VIB3Engine.js';
+        import { GallerySystem } from './src/gallery/GallerySystem.js';
+        import { CollectionManager } from './src/gallery/CollectionManager.js';
 
         // Initialize engine
         const engine = new VIB3Engine();
         await engine.initialize('vib3-container');
+
+        // Initialize Gallery system
+        const gallery = new GallerySystem(engine);
+        const collectionManager = new CollectionManager();
+
+        // Auto-discover and load collections
+        await collectionManager.autoDiscoverCollections().catch(err => {
+            console.log('No collections folder found - using built-in variations only');
+        });
 
         // Populate geometry dropdown
         const geometrySelect = document.getElementById('geometrySelect');
@@ -401,6 +673,28 @@
                 }
             });
             geometrySelect.value = params.geometry;
+        });
+
+        // Gallery buttons
+        document.getElementById('openGallery').addEventListener('click', () => {
+            gallery.openGallery();
+        });
+
+        document.getElementById('saveToGallery').addEventListener('click', () => {
+            // Find next available custom slot
+            let nextSlot = 30;
+            while (nextSlot < 100 && gallery.savedVariations.has(nextSlot)) {
+                nextSlot++;
+            }
+            if (nextSlot < 100) {
+                gallery.saveCurrentToSlot(nextSlot);
+                document.getElementById('status').textContent = `Saved to slot ${nextSlot}`;
+                setTimeout(() => {
+                    document.getElementById('status').textContent = 'VIB3+ Engine Ready';
+                }, 2000);
+            } else {
+                document.getElementById('status').textContent = 'Gallery full!';
+            }
         });
 
         console.log('%c🌟 VIB3+ Engine Ready', 'color: #00ffcc; font-size: 20px; font-weight: bold;');
