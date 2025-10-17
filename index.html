@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="styles/header.css">
     <link rel="stylesheet" href="styles/controls.css">
     <link rel="stylesheet" href="styles/reactivity.css">
+    <link rel="stylesheet" href="styles/gallery-modal.css">
     <link rel="stylesheet" href="styles/mobile.css">
     <link rel="stylesheet" href="styles/animations.css">
 </head>
@@ -174,7 +175,7 @@
         <!-- Color Parameters -->
         <div class="control-section">
             <div class="section-title">Color Parameters</div>
-            
+
             <div class="control-group">
                 <div class="control-label">
                     <span>Hue</span>
@@ -203,6 +204,150 @@
             </div>
         </div>
 
+        <!-- Interactivity Matrix Grid -->
+        <div class="control-section">
+            <div class="section-title">🎛️ Interactivity Matrix</div>
+
+            <!-- 3×3 Modular Reactivity Grid -->
+            <div class="reactivity-grid">
+                <!-- Header Row -->
+                <div class="reactivity-header"></div>
+                <div class="reactivity-header">🔷 FACET</div>
+                <div class="reactivity-header">🌌 QUANTUM</div>
+                <div class="reactivity-header">✨ HOLO</div>
+
+                <!-- Mouse Row -->
+                <div class="reactivity-label">🖱️ Mouse</div>
+                <div class="reactivity-cell" onclick="document.getElementById('facetedMouse').click()">
+                    <input type="checkbox" id="facetedMouse"
+                           onchange="toggleSystemReactivity('faceted', 'mouse', this.checked)">
+                    <span class="cell-text">ROT</span>
+                </div>
+                <div class="reactivity-cell" onclick="document.getElementById('quantumMouse').click()">
+                    <input type="checkbox" id="quantumMouse"
+                           onchange="toggleSystemReactivity('quantum', 'mouse', this.checked)">
+                    <span class="cell-text">VEL</span>
+                </div>
+                <div class="reactivity-cell" onclick="document.getElementById('holographicMouse').click()">
+                    <input type="checkbox" id="holographicMouse"
+                           onchange="toggleSystemReactivity('holographic', 'mouse', this.checked)">
+                    <span class="cell-text">SHIMMER</span>
+                </div>
+
+                <!-- Click Row -->
+                <div class="reactivity-label">👆 Click</div>
+                <div class="reactivity-cell" onclick="document.getElementById('facetedClick').click()">
+                    <input type="checkbox" id="facetedClick"
+                           onchange="toggleSystemReactivity('faceted', 'click', this.checked)">
+                    <span class="cell-text">BURST</span>
+                </div>
+                <div class="reactivity-cell" onclick="document.getElementById('quantumClick').click()">
+                    <input type="checkbox" id="quantumClick"
+                           onchange="toggleSystemReactivity('quantum', 'click', this.checked)">
+                    <span class="cell-text">BLAST</span>
+                </div>
+                <div class="reactivity-cell" onclick="document.getElementById('holographicClick').click()">
+                    <input type="checkbox" id="holographicClick"
+                           onchange="toggleSystemReactivity('holographic', 'click', this.checked)">
+                    <span class="cell-text">RIPPLE</span>
+                </div>
+
+                <!-- Scroll Row -->
+                <div class="reactivity-label">🌀 Scroll</div>
+                <div class="reactivity-cell" onclick="document.getElementById('facetedScroll').click()">
+                    <input type="checkbox" id="facetedScroll"
+                           onchange="toggleSystemReactivity('faceted', 'scroll', this.checked)">
+                    <span class="cell-text">CYCLE</span>
+                </div>
+                <div class="reactivity-cell" onclick="document.getElementById('quantumScroll').click()">
+                    <input type="checkbox" id="quantumScroll"
+                           onchange="toggleSystemReactivity('quantum', 'scroll', this.checked)">
+                    <span class="cell-text">WAVE</span>
+                </div>
+                <div class="reactivity-cell" onclick="document.getElementById('holographicScroll').click()">
+                    <input type="checkbox" id="holographicScroll"
+                           onchange="toggleSystemReactivity('holographic', 'scroll', this.checked)">
+                    <span class="cell-text">SWEEP</span>
+                </div>
+            </div>
+
+            <div class="reactivity-note">
+                Toggle mouse, click, and scroll interactions per system
+            </div>
+        </div>
+
+        <!-- Audio Reactivity Matrix Grid -->
+        <div class="control-section">
+            <div class="section-title">🎵 Audio Reactivity Matrix</div>
+
+            <!-- 3×3 Audio Reactivity Grid -->
+            <div class="audio-grid">
+                <!-- Header Row -->
+                <div class="audio-header"></div>
+                <div class="audio-header">🎨 COLOR</div>
+                <div class="audio-header">🧬 GEO</div>
+                <div class="audio-header">🌀 MOVE</div>
+
+                <!-- Low Sensitivity Row -->
+                <div class="audio-label">LOW</div>
+                <div class="audio-cell" onclick="document.getElementById('lowColor').click()">
+                    <input type="checkbox" id="lowColor"
+                           onchange="toggleAudioReactivity('low', 'color', this.checked)">
+                    <span class="cell-text">30%</span>
+                </div>
+                <div class="audio-cell" onclick="document.getElementById('lowGeometry').click()">
+                    <input type="checkbox" id="lowGeometry"
+                           onchange="toggleAudioReactivity('low', 'geometry', this.checked)">
+                    <span class="cell-text">30%</span>
+                </div>
+                <div class="audio-cell" onclick="document.getElementById('lowMovement').click()">
+                    <input type="checkbox" id="lowMovement"
+                           onchange="toggleAudioReactivity('low', 'movement', this.checked)">
+                    <span class="cell-text">30%</span>
+                </div>
+
+                <!-- Medium Sensitivity Row -->
+                <div class="audio-label">MED</div>
+                <div class="audio-cell" onclick="document.getElementById('mediumColor').click()">
+                    <input type="checkbox" id="mediumColor" checked
+                           onchange="toggleAudioReactivity('medium', 'color', this.checked)">
+                    <span class="cell-text">100%</span>
+                </div>
+                <div class="audio-cell" onclick="document.getElementById('mediumGeometry').click()">
+                    <input type="checkbox" id="mediumGeometry"
+                           onchange="toggleAudioReactivity('medium', 'geometry', this.checked)">
+                    <span class="cell-text">100%</span>
+                </div>
+                <div class="audio-cell" onclick="document.getElementById('mediumMovement').click()">
+                    <input type="checkbox" id="mediumMovement"
+                           onchange="toggleAudioReactivity('medium', 'movement', this.checked)">
+                    <span class="cell-text">100%</span>
+                </div>
+
+                <!-- High Sensitivity Row -->
+                <div class="audio-label">HIGH</div>
+                <div class="audio-cell" onclick="document.getElementById('highColor').click()">
+                    <input type="checkbox" id="highColor"
+                           onchange="toggleAudioReactivity('high', 'color', this.checked)">
+                    <span class="cell-text">200%</span>
+                </div>
+                <div class="audio-cell" onclick="document.getElementById('highGeometry').click()">
+                    <input type="checkbox" id="highGeometry"
+                           onchange="toggleAudioReactivity('high', 'geometry', this.checked)">
+                    <span class="cell-text">200%</span>
+                </div>
+                <div class="audio-cell" onclick="document.getElementById('highMovement').click()">
+                    <input type="checkbox" id="highMovement"
+                           onchange="toggleAudioReactivity('high', 'movement', this.checked)">
+                    <span class="cell-text">200%</span>
+                </div>
+            </div>
+
+            <div class="audio-note">
+                Control audio sensitivity and which parameters react
+            </div>
+        </div>
+
         <!-- Action Buttons -->
         <div class="control-section">
             <button class="panel-btn" onclick="randomizeAll()">🎲 Randomize Parameters</button>
@@ -223,6 +368,7 @@
     <script type="module" src="js/audio/audio-engine.js"></script>
     <script type="module" src="js/controls/ui-handlers.js"></script>
     <script type="module" src="js/gallery/gallery-manager.js"></script>
+    <script type="module" src="js/gallery/gallery-modal.js"></script>
     <script type="module" src="js/interactions/device-tilt.js"></script>
     
     <!-- Initialize globals and user parameter state BEFORE main app -->
