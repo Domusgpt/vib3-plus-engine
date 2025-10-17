@@ -27,11 +27,15 @@ export class FacetedSystem {
 
     /**
      * Initialize faceted system
+     * Finds canvas by ID in DOM (matches reference architecture)
      */
     initialize() {
-        this.canvas = document.getElementById('faceted-canvas');
+        // Faceted system uses 'content-canvas' as main canvas
+        // (Reference system has 5 layers, we're using simplified version for now)
+        this.canvas = document.getElementById('content-canvas');
         if (!this.canvas) {
-            console.error('❌ Faceted canvas not found');
+            console.error('❌ Faceted canvas (content-canvas) not found in DOM');
+            console.log('Looking for canvas IDs:', ['background-canvas', 'shadow-canvas', 'content-canvas', 'highlight-canvas', 'accent-canvas']);
             return false;
         }
 
@@ -47,7 +51,7 @@ export class FacetedSystem {
         }
 
         this.setupCanvasSize();
-        console.log('✅ Faceted System initialized');
+        console.log('✅ Faceted System initialized on content-canvas');
         return true;
     }
 

@@ -63,12 +63,33 @@ export class CanvasManager {
     }
 
     /**
-     * Create canvases for a new system
-     * @param {string} systemName - 'quantum', 'faceted', or 'holographic'
-     * @param {string[]} layers - Array of layer names (e.g., ['background', 'content', 'highlight'])
-     * @returns {Map<string, HTMLCanvasElement>} - Map of layer name to canvas element
+     * Get canvas IDs for a specific system (matches reference architecture)
+     * Faceted: 'background-canvas', 'shadow-canvas', etc.
+     * Quantum: 'quantum-background-canvas', 'quantum-shadow-canvas', etc.
+     * Holographic: 'holo-background-canvas', 'holo-shadow-canvas', etc.
      */
-    createSystemCanvases(systemName, layers = ['canvas']) {
+    getCanvasIdsForSystem(systemName) {
+        const baseIds = ['background-canvas', 'shadow-canvas', 'content-canvas', 'highlight-canvas', 'accent-canvas'];
+
+        switch (systemName) {
+            case 'faceted':
+                return baseIds; // Direct IDs for faceted
+            case 'quantum':
+                return baseIds.map(id => `quantum-${id}`);
+            case 'holographic':
+                return baseIds.map(id => `holo-${id}`);
+            default:
+                return baseIds;
+        }
+    }
+
+    /**
+     * Create canvases for a new system
+     * CRITICAL: Engines find these canvases by ID, not passed as parameters!
+     * @param {string} systemName - 'quantum', 'faceted', or 'holographic'
+     * @returns {string[]} - Array of canvas IDs created
+     */
+    createSystemCanvases(systemName) {
         console.log(`🎨 Creating canvases for ${systemName} system...`);
 
         // Destroy any active system first
@@ -83,7 +104,7 @@ export class CanvasManager {
 
         // Create container for this system's layers
         const systemContainer = document.createElement('div');
-        systemContainer.id = `${systemName}Layers`;
+        systemContainer.id = systemName === 'faceted' ? 'vib34dLayers' : `${systemName}Layers`;
         systemContainer.className = 'system-container';
         systemContainer.style.cssText = `
             position: absolute;
@@ -94,13 +115,15 @@ export class CanvasManager {
             overflow: hidden;
         `;
 
-        // Create each layer canvas
-        layers.forEach((layerName, index) => {
-            const canvas = document.createElement('canvas');
-            const canvasId = `${systemName}-${layerName}-canvas`;
+        // Get canvas IDs for this system
+        const canvasIds = this.getCanvasIdsForSystem(systemName);
 
-            canvas.id = canvasId;
-            canvas.className = `layer-canvas layer-${layerName}`;
+        // Create each canvas with specific ID that engines expect
+        canvasIds.forEach((canvasId, index) => {
+            const canvas = document.createElement('canvas');
+
+            canvas.id = canvasId; // CRITICAL: Exact ID that engine will search for
+            canvas.className = 'visualization-canvas layer-canvas';
             canvas.width = width;
             canvas.height = height;
             canvas.style.cssText = `
@@ -110,22 +133,22 @@ export class CanvasManager {
                 width: 100%;
                 height: 100%;
                 z-index: ${index};
-                pointer-events: ${layerName === 'content' ? 'auto' : 'none'};
+                pointer-events: ${canvasId.includes('content') ? 'auto' : 'none'};
             `;
 
             systemContainer.appendChild(canvas);
-            this.activeCanvases.set(layerName, canvas);
+            this.activeCanvases.set(canvasId, canvas);
 
-            console.log(`  ✓ Created ${layerName} canvas (${width}x${height})`);
+            console.log(`  ✓ Created canvas: ${canvasId} (${width}x${height})`);
         });
 
         // Add container to DOM
         this.container.appendChild(systemContainer);
 
         this.activeSystem = systemName;
-        console.log(`✅ ${systemName} canvases ready`);
+        console.log(`✅ ${systemName} canvases ready (engines will find by ID)`);
 
-        return this.activeCanvases;
+        return canvasIds; // Return IDs, not canvas objects
     }
 
     /**

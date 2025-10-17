@@ -42,57 +42,51 @@ export class VIB3Engine {
     }
 
     /**
-     * Get layer configuration for each system type
-     */
-    getSystemLayers(systemName) {
-        const layerConfigs = {
-            quantum: ['background', 'shadow', 'content', 'highlight', 'accent'],
-            faceted: ['canvas'],
-            holographic: ['background', 'shadow', 'content', 'highlight', 'accent']
-        };
-        return layerConfigs[systemName] || ['canvas'];
-    }
-
-    /**
      * Create and initialize a specific system
+     * CRITICAL: Engines find canvases by ID in DOM, not passed as parameters!
      */
     async createSystem(systemName) {
         console.log(`🔧 Creating ${systemName} system...`);
 
-        // Get layers for this system
-        const layers = this.getSystemLayers(systemName);
+        // Create canvases with correct IDs in DOM
+        // CanvasManager returns array of canvas IDs created
+        const canvasIds = this.canvasManager.createSystemCanvases(systemName);
 
-        // Create canvases using CanvasManager
-        const canvases = this.canvasManager.createSystemCanvases(systemName, layers);
-
-        // Create system instance based on type
+        // Create system instance - engines find canvases by ID in DOM
         let system = null;
         try {
             switch (systemName) {
                 case 'quantum':
+                    // QuantumEngine finds canvases by ID and initializes in constructor
                     system = new QuantumEngine();
-                    await system.initialize(canvases);
                     break;
 
                 case 'faceted':
+                    // FacetedSystem needs explicit initialization after construction
                     system = new FacetedSystem();
-                    await system.initialize(canvases);
+                    const facetedSuccess = system.initialize();
+                    if (!facetedSuccess) {
+                        throw new Error('Faceted system initialization failed');
+                    }
                     break;
 
                 case 'holographic':
+                    // RealHolographicSystem finds canvases and initializes in constructor
                     system = new RealHolographicSystem();
-                    await system.initialize(canvases);
                     break;
 
                 default:
                     throw new Error(`Unknown system: ${systemName}`);
             }
 
-            // Register WebGL contexts with CanvasManager
-            canvases.forEach((canvas, layerName) => {
-                const gl = canvas.getContext('webgl') || canvas.getContext('webgl2');
-                if (gl) {
-                    this.canvasManager.registerContext(layerName, gl);
+            // Register WebGL contexts with CanvasManager for cleanup
+            canvasIds.forEach(canvasId => {
+                const canvas = document.getElementById(canvasId);
+                if (canvas) {
+                    const gl = canvas.getContext('webgl') || canvas.getContext('webgl2');
+                    if (gl) {
+                        this.canvasManager.registerContext(canvasId, gl);
+                    }
                 }
             });
 
