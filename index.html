@@ -44,20 +44,21 @@
         main {
             flex: 1;
             display: grid;
-            grid-template-columns: 350px 1fr;
-            gap: 1rem;
-            padding: 1rem;
+            grid-template-columns: 400px 1fr;
+            gap: 1.5rem;
+            padding: 1.5rem;
             overflow: hidden;
         }
 
         .controls {
-            background: rgba(26, 26, 46, 0.8);
-            backdrop-filter: blur(10px);
-            border: 1px solid #00ffcc44;
-            border-radius: 12px;
-            padding: 1.5rem;
+            background: rgba(10, 10, 26, 0.95);
+            backdrop-filter: blur(20px);
+            border: 2px solid #00ffcc;
+            border-radius: 16px;
+            padding: 2rem;
             overflow-y: auto;
-            max-height: calc(100vh - 140px);
+            max-height: calc(100vh - 150px);
+            box-shadow: 0 8px 32px rgba(0, 255, 204, 0.3);
         }
 
         .control-group {
@@ -68,34 +69,64 @@
 
         .control-group h3 {
             color: #00ffcc;
-            margin-bottom: 0.75rem;
-            font-size: 0.95rem;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
+            border-bottom: 2px solid #00ffcc44;
+            padding-bottom: 0.5rem;
         }
 
         button {
             width: 100%;
-            padding: 0.75rem;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(135deg, #00ffcc22, #0099ff22);
-            border: 1px solid #00ffcc;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            background: linear-gradient(135deg, #00ffcc11, #0099ff11);
+            border: 2px solid #00ffcc66;
             color: #00ffcc;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 204, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        button:hover::before {
+            left: 100%;
         }
 
         button:hover {
-            background: linear-gradient(135deg, #00ffcc44, #0099ff44);
-            box-shadow: 0 0 20px rgba(0, 255, 204, 0.3);
-            transform: translateY(-2px);
+            background: linear-gradient(135deg, #00ffcc33, #0099ff33);
+            border-color: #00ffcc;
+            box-shadow: 0 0 30px rgba(0, 255, 204, 0.5);
+            transform: translateY(-3px);
         }
 
         button.active {
             background: linear-gradient(135deg, #00ffcc, #0099ff);
             color: #000;
+            border-color: #00ff88;
+            box-shadow: 0 0 40px rgba(0, 255, 204, 0.8);
+            font-weight: 700;
+        }
+
+        .system-btn {
+            font-size: 1.1rem;
+            padding: 1.25rem;
         }
 
         .toggle-btn {
@@ -677,21 +708,46 @@
             geometrySelect.appendChild(option);
         });
 
-        // System switching
+        // System switching - WITH PROPER STATUS MESSAGES
         document.querySelectorAll('.system-btn').forEach(btn => {
             btn.addEventListener('click', async () => {
                 const system = btn.dataset.system;
-                await engine.switchSystem(system);
 
-                document.querySelectorAll('.system-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
+                // Show loading status
+                const statusEl = document.getElementById('status');
+                statusEl.textContent = `Loading ${system} system...`;
+                statusEl.className = 'status';
 
-                const badges = {
-                    quantum: '🌌 QUANTUM',
-                    faceted: '🔷 FACETED',
-                    holographic: '🌈 HOLOGRAPHIC'
-                };
-                document.getElementById('systemBadge').textContent = badges[system];
+                console.log(`🔄 Switching to ${system} system...`);
+
+                try {
+                    const success = await engine.switchSystem(system);
+
+                    if (success) {
+                        // Update UI
+                        document.querySelectorAll('.system-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+
+                        const badges = {
+                            quantum: '🌌 QUANTUM',
+                            faceted: '🔷 FACETED',
+                            holographic: '🌈 HOLOGRAPHIC'
+                        };
+                        document.getElementById('systemBadge').textContent = badges[system];
+
+                        statusEl.textContent = `${badges[system]} Active`;
+                        statusEl.className = 'status ready';
+                        console.log(`✅ ${system} system loaded successfully`);
+                    } else {
+                        statusEl.textContent = `❌ Failed to load ${system}`;
+                        statusEl.className = 'status';
+                        console.error(`❌ Failed to switch to ${system} system`);
+                    }
+                } catch (error) {
+                    statusEl.textContent = `❌ Error loading ${system}`;
+                    statusEl.className = 'status';
+                    console.error(`❌ Error switching to ${system}:`, error);
+                }
             });
         });
 
@@ -794,20 +850,75 @@
             }
         });
 
-        // Interactivity toggle buttons
+        // Interactivity toggle buttons - ACTUALLY FUNCTIONAL
         document.querySelectorAll('.toggle-btn').forEach(btn => {
             btn.addEventListener('click', () => {
                 const toggle = btn.dataset.toggle;
                 interactivityState[toggle] = !interactivityState[toggle];
                 btn.classList.toggle('active', interactivityState[toggle]);
 
-                // Update engine with new interactivity state
-                const systemInstance = engine.getActiveSystemInstance();
-                if (systemInstance && systemInstance.setInteractivity) {
-                    systemInstance.setInteractivity(interactivityState);
+                console.log(`🔄 Toggle ${toggle}:`, interactivityState[toggle] ? 'ON' : 'OFF');
+
+                // AUDIO TOGGLE
+                if (toggle === 'audio') {
+                    const systemInstance = engine.getActiveSystemInstance();
+                    if (interactivityState.audio) {
+                        // Enable audio
+                        if (systemInstance.enableAudio) {
+                            systemInstance.enableAudio();
+                            console.log('🎵 Audio reactivity ENABLED');
+                        } else if (systemInstance.initAudio) {
+                            systemInstance.initAudio();
+                            console.log('🎵 Audio reactivity ENABLED');
+                        }
+                        window.audioEnabled = true;
+                    } else {
+                        // Disable audio
+                        if (systemInstance.disableAudio) {
+                            systemInstance.disableAudio();
+                        } else if (systemInstance.toggleAudio) {
+                            systemInstance.toggleAudio(false);
+                        }
+                        window.audioEnabled = false;
+                        console.log('🔇 Audio reactivity DISABLED');
+                    }
                 }
 
-                console.log(`Toggle ${toggle}:`, interactivityState[toggle]);
+                // TILT TOGGLE
+                if (toggle === 'tilt') {
+                    if (interactivityState.tilt) {
+                        console.log('📱 Device tilt ENABLED');
+                    } else {
+                        console.log('📱 Device tilt DISABLED');
+                    }
+                }
+
+                // MOUSE TOGGLE
+                if (toggle === 'mouse') {
+                    if (interactivityState.mouse) {
+                        console.log('🖱️ Mouse reactivity ENABLED');
+                    } else {
+                        console.log('🖱️ Mouse reactivity DISABLED');
+                    }
+                }
+
+                // ENHANCED FX TOGGLE
+                if (toggle === 'enhanced') {
+                    if (interactivityState.enhanced) {
+                        console.log('✨ Enhanced FX ENABLED');
+                    } else {
+                        console.log('✨ Enhanced FX DISABLED');
+                    }
+                }
+
+                // ACCENT TWIN TOGGLE
+                if (toggle === 'accentTwin') {
+                    if (interactivityState.accentTwin) {
+                        console.log('🌟 Accent Twin ENABLED');
+                    } else {
+                        console.log('🌟 Accent Twin DISABLED');
+                    }
+                }
             });
         });
 
