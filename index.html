@@ -10,7 +10,7 @@
     
     <!-- Organized CSS Architecture -->
     <link rel="stylesheet" href="styles/base.css">
-    <link rel="stylesheet" href="styles/header.css">
+    <link rel="stylesheet" href="styles/header-enhanced.css">
     <link rel="stylesheet" href="styles/controls.css">
     <link rel="stylesheet" href="styles/reactivity.css">
     <link rel="stylesheet" href="styles/gallery-modal.css">
@@ -20,31 +20,49 @@
     <link rel="stylesheet" href="styles/animations.css">
 </head>
 <body class="loading">
-    <!-- Top Navigation Bar -->
+    <!-- Enhanced Top Navigation Bar -->
     <div class="top-bar">
-        <div class="logo">VIB34D ENGINE</div>
-        
+        <!-- Logo Section -->
+        <div class="logo-section">
+            <div class="logo">VIB3+ ENGINE</div>
+            <div class="engine-status">24 GEOMETRIES • 6D</div>
+        </div>
+
+        <!-- System Selector -->
         <div class="system-selector">
             <button class="system-btn active" data-system="faceted" onclick="switchSystem('faceted')">
-                🔷 FACETED
+                <span class="system-icon">🔷</span>
+                <span>FACETED</span>
             </button>
             <button class="system-btn" data-system="quantum" onclick="switchSystem('quantum')">
-                🌌 QUANTUM
+                <span class="system-icon">🌌</span>
+                <span>QUANTUM</span>
             </button>
             <button class="system-btn" data-system="holographic" onclick="switchSystem('holographic')">
-                ✨ HOLOGRAPHIC
+                <span class="system-icon">✨</span>
+                <span>HOLOGRAPHIC</span>
             </button>
             <button class="system-btn" data-system="polychora" onclick="switchSystem('polychora')">
-                🔮 POLYCHORA
+                <span class="system-icon">🔮</span>
+                <span>POLYCHORA</span>
             </button>
         </div>
-        
-        <div class="action-buttons">
-            <button class="action-btn" onclick="openGallery()" title="Gallery">🖼️</button>
-            <button class="action-btn" onclick="toggleAudio()" title="Audio">🎵</button>
-            <button class="action-btn" onclick="toggleDeviceTilt()" title="Device Tilt (4D Rotation)" id="tiltBtn">📱</button>
-            <button class="action-btn" onclick="showLLMInterface()" title="AI Parameters">🤖</button>
-            <button class="action-btn" onclick="toggleInteractivity()" title="Interactivity Menu (Press I)">I</button>
+
+        <!-- Action Section -->
+        <div class="action-section">
+            <!-- Save Button (prominent) -->
+            <button class="save-btn" onclick="saveToGallery()" title="Save Current State">
+                💾 <span>SAVE</span>
+            </button>
+
+            <!-- Other Action Buttons -->
+            <div class="action-buttons">
+                <button class="action-btn" onclick="openGallery()" title="Gallery">🖼️</button>
+                <button class="action-btn" onclick="toggleAudio()" title="Audio">🎵</button>
+                <button class="action-btn" onclick="toggleDeviceTilt()" title="Device Tilt (4D Rotation)" id="tiltBtn">📱</button>
+                <button class="action-btn" onclick="showLLMInterface()" title="AI Parameters">🤖</button>
+                <button class="action-btn" onclick="toggleInteractivity()" title="Interactivity Menu (Press I)">I</button>
+            </div>
         </div>
     </div>
 
@@ -374,14 +392,16 @@
         <div class="bezel-content" id="export-content">
             <div class="tab-content-grid">
                 <div class="control-section">
-                    <div class="section-title">Actions & Export</div>
+                    <div class="section-title">📤 Export & Actions</div>
                     <div class="action-button-row">
-                        <button class="panel-btn" onclick="randomizeAll()">🎲 Randomize Parameters</button>
-                        <button class="panel-btn" onclick="randomizeEverything()">🎯 Full Random</button>
-                        <button class="panel-btn" onclick="resetAll()">🔄 Reset All</button>
-                        <button class="panel-btn" onclick="saveToGallery()">💾 Save to Gallery</button>
                         <button class="panel-btn" onclick="createTradingCard()">🎴 Trading Card</button>
                         <button class="panel-btn" onclick="openGallery()">🖼️ Open Gallery</button>
+                        <button class="panel-btn" onclick="resetAll()">🔄 Reset All</button>
+                    </div>
+                    <div style="margin-top: 15px; padding: 12px; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(0, 255, 255, 0.15); border-radius: 8px; text-align: center;">
+                        <div style="font-family: 'Orbitron', monospace; font-size: 0.75rem; color: rgba(255, 255, 255, 0.7);">
+                            💡 <strong style="color: #00ffff;">TIP:</strong> Use <strong>🎲 Randomize All</strong> and <strong>🎯 Random Tab</strong> buttons at the top of each tab to randomize parameters!
+                        </div>
                     </div>
                 </div>
             </div>
@@ -402,6 +422,7 @@
     <script type="module" src="js/ui/bezel-tabs.js"></script>
     <script type="module" src="js/geometry/geometry-tabs.js"></script>
     <script type="module" src="js/interactions/device-tilt.js"></script>
+    <script type="module" src="js/core/ui-fixes.js"></script>
     
     <!-- Initialize globals and user parameter state BEFORE main app -->
     <script>
