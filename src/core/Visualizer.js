@@ -233,9 +233,87 @@ vec3 project4Dto3D(vec4 p) {
     return vec3(p.x * w, p.y * w, p.z * w);
 }
 
+// ========================================
+// POLYTOPE CORE WARP FUNCTIONS (24 Geometries)
+// ========================================
+// Wraps geometry through 4D hypersphere (geometries 8-15)
+vec3 warpHypersphereCore(vec3 p, int geometryIndex, vec2 mouseDelta) {
+    float radius = length(p);
+    float morphBlend = clamp(u_morphFactor * 0.6 + (u_dimension - 3.0) * 0.25, 0.0, 2.0);
+    float w = sin(radius * (1.3 + float(geometryIndex) * 0.12) + u_time * 0.0008 * u_speed);
+    w *= (0.4 + morphBlend * 0.45);
+
+    vec4 p4d = vec4(p * (1.0 + morphBlend * 0.2), w);
+
+    // Apply 6D rotation in 4D space
+    p4d = rotateXY(u_rot4dXY) * p4d;
+    p4d = rotateXZ(u_rot4dXZ) * p4d;
+    p4d = rotateYZ(u_rot4dYZ) * p4d;
+    p4d = rotateXW(u_rot4dXW) * p4d;
+    p4d = rotateYW(u_rot4dYW) * p4d;
+    p4d = rotateZW(u_rot4dZW) * p4d;
+
+    vec3 projected = project4Dto3D(p4d);
+    return mix(p, projected, clamp(0.45 + morphBlend * 0.35, 0.0, 1.0));
+}
+
+// Wraps geometry through 4D hypertetrahedron (geometries 16-23)
+vec3 warpHypertetraCore(vec3 p, int geometryIndex, vec2 mouseDelta) {
+    vec3 c1 = normalize(vec3(1.0, 1.0, 1.0));
+    vec3 c2 = normalize(vec3(-1.0, -1.0, 1.0));
+    vec3 c3 = normalize(vec3(-1.0, 1.0, -1.0));
+    vec3 c4 = normalize(vec3(1.0, -1.0, -1.0));
+
+    float morphBlend = clamp(u_morphFactor * 0.8 + (u_dimension - 3.0) * 0.2, 0.0, 2.0);
+    float basisMix = dot(p, c1) * 0.14 + dot(p, c2) * 0.1 + dot(p, c3) * 0.08;
+    float w = sin(basisMix * 5.5 + u_time * 0.0009 * u_speed);
+    w *= cos(dot(p, c4) * 4.2 - u_time * 0.0007 * u_speed);
+    w *= (0.5 + morphBlend * 0.4);
+
+    vec3 offset = vec3(dot(p, c1), dot(p, c2), dot(p, c3)) * 0.1 * morphBlend;
+    vec4 p4d = vec4(p + offset, w);
+
+    // Apply 6D rotation in 4D space
+    p4d = rotateXY(u_rot4dXY) * p4d;
+    p4d = rotateXZ(u_rot4dXZ) * p4d;
+    p4d = rotateYZ(u_rot4dYZ) * p4d;
+    p4d = rotateXW(u_rot4dXW) * p4d;
+    p4d = rotateYW(u_rot4dYW) * p4d;
+    p4d = rotateZW(u_rot4dZW) * p4d;
+
+    vec3 projected = project4Dto3D(p4d);
+
+    float planeInfluence = min(min(abs(dot(p, c1)), abs(dot(p, c2))), min(abs(dot(p, c3)), abs(dot(p, c4))));
+    vec3 blended = mix(p, projected, clamp(0.45 + morphBlend * 0.35, 0.0, 1.0));
+    return mix(blended, blended * (1.0 - planeInfluence * 0.55), 0.2 + morphBlend * 0.2);
+}
+
+// Applies polytope core warp based on geometry index (0-23)
+// 0-7: Base (no warp), 8-15: Hypersphere, 16-23: Hypertetrahedron
+vec3 applyCoreWarp(vec3 p, float geometryType, vec2 mouseDelta) {
+    float totalBase = 8.0;
+    float coreFloat = floor(geometryType / totalBase);
+    int coreIndex = int(clamp(coreFloat, 0.0, 2.0));
+    float baseGeomFloat = mod(geometryType, totalBase);
+    int geometryIndex = int(clamp(floor(baseGeomFloat + 0.5), 0.0, totalBase - 1.0));
+
+    if (coreIndex == 1) {
+        return warpHypersphereCore(p, geometryIndex, mouseDelta);
+    }
+    if (coreIndex == 2) {
+        return warpHypertetraCore(p, geometryIndex, mouseDelta);
+    }
+    return p;
+}
+// ========================================
+
 // Simplified geometry functions for WebGL 1.0 compatibility (ORIGINAL FACETED)
+// NOW SUPPORTS 24 GEOMETRIES: Decodes geometry index to base geometry (0-7)
 float geometryFunction(vec4 p) {
-    int geomType = int(u_geometry);
+    // Decode geometry: base = geometry % 8
+    float totalBase = 8.0;
+    float baseGeomFloat = mod(u_geometry, totalBase);
+    int geomType = int(clamp(floor(baseGeomFloat + 0.5), 0.0, totalBase - 1.0));
     
     if (geomType == 0) {
         // Tetrahedron lattice - UNIFORM GRID DENSITY
@@ -320,9 +398,17 @@ void main() {
     pos = rotateXW(u_rot4dXW) * pos;
     pos = rotateYW(u_rot4dYW) * pos;
     pos = rotateZW(u_rot4dZW) * pos;
-    
-    // Calculate geometry value
-    float value = geometryFunction(pos);
+
+    // POLYTOPE WARP: Apply 4D polytope core transformation (24-geometry system)
+    // Decode geometry: 0-7 Base, 8-15 Hypersphere, 16-23 Hypertetrahedron
+    vec3 basePoint = project4Dto3D(pos);
+    vec3 warpedPoint = applyCoreWarp(basePoint, u_geometry, u_mouse - 0.5);
+
+    // Convert warped 3D back to 4D for geometry evaluation
+    vec4 warpedPos = vec4(warpedPoint, pos.w);
+
+    // Calculate geometry value using WARPED position
+    float value = geometryFunction(warpedPos);
     
     // Apply chaos
     float noise = sin(pos.x * 7.0) * cos(pos.y * 11.0) * sin(pos.z * 13.0);

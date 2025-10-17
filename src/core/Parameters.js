@@ -47,7 +47,7 @@ export class ParameterManager {
             hue: { min: 0, max: 360, step: 1, type: 'int' },
             intensity: { min: 0, max: 1, step: 0.01, type: 'float' },
             saturation: { min: 0, max: 1, step: 0.01, type: 'float' },
-            geometry: { min: 0, max: 7, step: 1, type: 'int' }
+            geometry: { min: 0, max: 23, step: 1, type: 'int' }
         };
         
         // Default parameter backup for reset
@@ -219,7 +219,7 @@ export class ParameterManager {
         this.params.chaos = Math.random();
         this.params.speed = 0.1 + Math.random() * 2.9;
         this.params.hue = Math.random() * 360;
-        this.params.geometry = Math.floor(Math.random() * 8);
+        this.params.geometry = Math.floor(Math.random() * 24);
     }
     
     /**
