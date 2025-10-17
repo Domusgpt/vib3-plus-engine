@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="styles/controls.css">
     <link rel="stylesheet" href="styles/reactivity.css">
     <link rel="stylesheet" href="styles/gallery-modal.css">
+    <link rel="stylesheet" href="styles/bottom-bezel.css">
     <link rel="stylesheet" href="styles/mobile.css">
     <link rel="stylesheet" href="styles/animations.css">
 </head>
@@ -55,306 +56,317 @@
         <div class="holographic-layers" id="polychoraLayers" style="display: none;"></div>
     </div>
 
-    <!-- Control Panel -->
+    <!-- Bottom Bezel Control Panel (Tab-Based) -->
     <div class="control-panel" id="controlPanel">
-        <div class="panel-header" id="panelHeader">
-            <span>FACETED SYSTEM</span>
-            <button class="mobile-collapse-btn" onclick="toggleMobilePanel()" style="display: none;">▼</button>
+        <!-- Bezel Header with Tabs -->
+        <div class="bezel-header">
+            <div class="bezel-tabs">
+                <button class="bezel-tab active" data-tab="controls" onclick="switchBezelTab('controls')">
+                    <span class="tab-icon">⚙️</span>
+                    <span>Controls</span>
+                </button>
+                <button class="bezel-tab" data-tab="color" onclick="switchBezelTab('color')">
+                    <span class="tab-icon">🎨</span>
+                    <span>Color</span>
+                </button>
+                <button class="bezel-tab" data-tab="geometry" onclick="switchBezelTab('geometry')">
+                    <span class="tab-icon">🧬</span>
+                    <span>Geometry</span>
+                </button>
+                <button class="bezel-tab" data-tab="reactivity" onclick="switchBezelTab('reactivity')">
+                    <span class="tab-icon">🎛️</span>
+                    <span>Reactivity</span>
+                </button>
+                <button class="bezel-tab" data-tab="export" onclick="switchBezelTab('export')">
+                    <span class="tab-icon">💾</span>
+                    <span>Export</span>
+                </button>
+            </div>
+
+            <!-- Quick Actions (shown when collapsed) -->
+            <div class="quick-access">
+                <button class="quick-action-btn" onclick="quickRandomize()" title="Quick Randomize">🎲</button>
+                <button class="quick-action-btn" onclick="quickSave()" title="Quick Save">💾</button>
+                <button class="quick-action-btn" onclick="quickGallery()" title="Open Gallery">🖼️</button>
+            </div>
+
+            <!-- Collapse Toggle -->
+            <button class="bezel-collapse-btn" onclick="toggleBezelCollapse()" title="Toggle Controls (Ctrl+B / Space)">▼</button>
         </div>
 
-        <!-- Geometry Selection -->
-        <div class="control-section" id="geometrySection">
-            <div class="section-title">Geometry</div>
-            <div class="geometry-grid" id="geometryGrid">
-                <!-- Geometry buttons populated by JavaScript -->
-            </div>
-        </div>
-
-        <!-- Parameter Controls -->
-        <div class="control-section">
-            <div class="section-title">6D Rotations (All Planes)</div>
-
-            <!-- 3D Space Rotations -->
-            <div class="control-group">
-                <div class="control-label">
-                    <span>X-Y Rotation (3D)</span>
-                    <span class="control-value" id="rot4dXY-display">0.00</span>
+        <!-- Tab 1: Controls Content (6D Rotations + Visual Parameters) -->
+        <div class="bezel-content active" id="controls-content">
+            <div class="tab-content-grid">
+                <!-- 3D Space Rotations -->
+                <div class="control-section">
+                    <div class="section-title">3D Space Rotations</div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>X-Y Plane</span>
+                            <span class="control-value" id="rot4dXY-display">0.00</span>
+                        </div>
+                        <input type="range" id="rot4dXY" class="control-slider" min="-6.28" max="6.28" step="0.01" value="0"
+                               oninput="updateParameter('rot4dXY', this.value)">
+                    </div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>X-Z Plane</span>
+                            <span class="control-value" id="rot4dXZ-display">0.00</span>
+                        </div>
+                        <input type="range" id="rot4dXZ" class="control-slider" min="-6.28" max="6.28" step="0.01" value="0"
+                               oninput="updateParameter('rot4dXZ', this.value)">
+                    </div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Y-Z Plane</span>
+                            <span class="control-value" id="rot4dYZ-display">0.00</span>
+                        </div>
+                        <input type="range" id="rot4dYZ" class="control-slider" min="-6.28" max="6.28" step="0.01" value="0"
+                               oninput="updateParameter('rot4dYZ', this.value)">
+                    </div>
                 </div>
-                <input type="range" id="rot4dXY" class="control-slider" min="-6.28" max="6.28" step="0.01" value="0"
-                       oninput="updateParameter('rot4dXY', this.value)">
-            </div>
 
-            <div class="control-group">
-                <div class="control-label">
-                    <span>X-Z Rotation (3D)</span>
-                    <span class="control-value" id="rot4dXZ-display">0.00</span>
+                <!-- 4D Hyperspace Rotations -->
+                <div class="control-section">
+                    <div class="section-title">4D Hyperspace Rotations</div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>X-W Plane</span>
+                            <span class="control-value" id="rot4dXW-display">0.00</span>
+                        </div>
+                        <input type="range" id="rot4dXW" class="control-slider" min="-6.28" max="6.28" step="0.01" value="0"
+                               oninput="updateParameter('rot4dXW', this.value)">
+                    </div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Y-W Plane</span>
+                            <span class="control-value" id="rot4dYW-display">0.00</span>
+                        </div>
+                        <input type="range" id="rot4dYW" class="control-slider" min="-6.28" max="6.28" step="0.01" value="0"
+                               oninput="updateParameter('rot4dYW', this.value)">
+                    </div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Z-W Plane</span>
+                            <span class="control-value" id="rot4dZW-display">0.00</span>
+                        </div>
+                        <input type="range" id="rot4dZW" class="control-slider" min="-6.28" max="6.28" step="0.01" value="0"
+                               oninput="updateParameter('rot4dZW', this.value)">
+                    </div>
                 </div>
-                <input type="range" id="rot4dXZ" class="control-slider" min="-6.28" max="6.28" step="0.01" value="0"
-                       oninput="updateParameter('rot4dXZ', this.value)">
-            </div>
 
-            <div class="control-group">
-                <div class="control-label">
-                    <span>Y-Z Rotation (3D)</span>
-                    <span class="control-value" id="rot4dYZ-display">0.00</span>
+                <!-- Visual Parameters -->
+                <div class="control-section">
+                    <div class="section-title">Visual Parameters</div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Grid Density</span>
+                            <span class="control-value" id="gridDensity-display">15</span>
+                        </div>
+                        <input type="range" id="gridDensity" class="control-slider" min="5" max="100" step="1" value="15"
+                               oninput="updateParameter('gridDensity', this.value)">
+                    </div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Morph Factor</span>
+                            <span class="control-value" id="morphFactor-display">1.00</span>
+                        </div>
+                        <input type="range" id="morphFactor" class="control-slider" min="0" max="2" step="0.01" value="1"
+                               oninput="updateParameter('morphFactor', this.value)">
+                    </div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Chaos</span>
+                            <span class="control-value" id="chaos-display">0.20</span>
+                        </div>
+                        <input type="range" id="chaos" class="control-slider" min="0" max="1" step="0.01" value="0.2"
+                               oninput="updateParameter('chaos', this.value)">
+                    </div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Speed</span>
+                            <span class="control-value" id="speed-display">1.00</span>
+                        </div>
+                        <input type="range" id="speed" class="control-slider" min="0.1" max="3" step="0.01" value="1"
+                               oninput="updateParameter('speed', this.value)">
+                    </div>
                 </div>
-                <input type="range" id="rot4dYZ" class="control-slider" min="-6.28" max="6.28" step="0.01" value="0"
-                       oninput="updateParameter('rot4dYZ', this.value)">
-            </div>
-
-            <!-- 4D Hyperspace Rotations -->
-            <div class="control-group">
-                <div class="control-label">
-                    <span>X-W Rotation (4D)</span>
-                    <span class="control-value" id="rot4dXW-display">0.00</span>
-                </div>
-                <input type="range" id="rot4dXW" class="control-slider" min="-6.28" max="6.28" step="0.01" value="0"
-                       oninput="updateParameter('rot4dXW', this.value)">
-            </div>
-
-            <div class="control-group">
-                <div class="control-label">
-                    <span>Y-W Rotation (4D)</span>
-                    <span class="control-value" id="rot4dYW-display">0.00</span>
-                </div>
-                <input type="range" id="rot4dYW" class="control-slider" min="-6.28" max="6.28" step="0.01" value="0"
-                       oninput="updateParameter('rot4dYW', this.value)">
-            </div>
-
-            <div class="control-group">
-                <div class="control-label">
-                    <span>Z-W Rotation (4D)</span>
-                    <span class="control-value" id="rot4dZW-display">0.00</span>
-                </div>
-                <input type="range" id="rot4dZW" class="control-slider" min="-6.28" max="6.28" step="0.01" value="0"
-                       oninput="updateParameter('rot4dZW', this.value)">
-            </div>
-        </div>
-
-        <!-- Visual Parameters -->
-        <div class="control-section">
-            <div class="section-title">Visual Parameters</div>
-            
-            <div class="control-group">
-                <div class="control-label">
-                    <span>Grid Density</span>
-                    <span class="control-value" id="gridDensity-display">15</span>
-                </div>
-                <input type="range" id="gridDensity" class="control-slider" min="5" max="100" step="1" value="15"
-                       oninput="updateParameter('gridDensity', this.value)">
-            </div>
-
-            <div class="control-group">
-                <div class="control-label">
-                    <span>Morph Factor</span>
-                    <span class="control-value" id="morphFactor-display">1.00</span>
-                </div>
-                <input type="range" id="morphFactor" class="control-slider" min="0" max="2" step="0.01" value="1"
-                       oninput="updateParameter('morphFactor', this.value)">
-            </div>
-
-            <div class="control-group">
-                <div class="control-label">
-                    <span>Chaos</span>
-                    <span class="control-value" id="chaos-display">0.20</span>
-                </div>
-                <input type="range" id="chaos" class="control-slider" min="0" max="1" step="0.01" value="0.2"
-                       oninput="updateParameter('chaos', this.value)">
-            </div>
-
-            <div class="control-group">
-                <div class="control-label">
-                    <span>Speed</span>
-                    <span class="control-value" id="speed-display">1.00</span>
-                </div>
-                <input type="range" id="speed" class="control-slider" min="0.1" max="3" step="0.01" value="1"
-                       oninput="updateParameter('speed', this.value)">
-            </div>
-        </div>
-
-        <!-- Color Parameters -->
-        <div class="control-section">
-            <div class="section-title">Color Parameters</div>
-
-            <div class="control-group">
-                <div class="control-label">
-                    <span>Hue</span>
-                    <span class="control-value" id="hue-display">200</span>
-                </div>
-                <input type="range" id="hue" class="control-slider" min="0" max="360" step="1" value="200"
-                       oninput="updateParameter('hue', this.value)">
-            </div>
-
-            <div class="control-group">
-                <div class="control-label">
-                    <span>Intensity</span>
-                    <span class="control-value" id="intensity-display">0.50</span>
-                </div>
-                <input type="range" id="intensity" class="control-slider" min="0" max="1" step="0.01" value="0.5"
-                       oninput="updateParameter('intensity', this.value)">
-            </div>
-
-            <div class="control-group">
-                <div class="control-label">
-                    <span>Saturation</span>
-                    <span class="control-value" id="saturation-display">0.80</span>
-                </div>
-                <input type="range" id="saturation" class="control-slider" min="0" max="1" step="0.01" value="0.8"
-                       oninput="updateParameter('saturation', this.value)">
             </div>
         </div>
 
-        <!-- Interactivity Matrix Grid -->
-        <div class="control-section">
-            <div class="section-title">🎛️ Interactivity Matrix</div>
-
-            <!-- 3×3 Modular Reactivity Grid -->
-            <div class="reactivity-grid">
-                <!-- Header Row -->
-                <div class="reactivity-header"></div>
-                <div class="reactivity-header">🔷 FACET</div>
-                <div class="reactivity-header">🌌 QUANTUM</div>
-                <div class="reactivity-header">✨ HOLO</div>
-
-                <!-- Mouse Row -->
-                <div class="reactivity-label">🖱️ Mouse</div>
-                <div class="reactivity-cell" onclick="document.getElementById('facetedMouse').click()">
-                    <input type="checkbox" id="facetedMouse"
-                           onchange="toggleSystemReactivity('faceted', 'mouse', this.checked)">
-                    <span class="cell-text">ROT</span>
+        <!-- Tab 2: Color Content -->
+        <div class="bezel-content" id="color-content">
+            <div class="tab-content-grid">
+                <div class="control-section">
+                    <div class="section-title">Color Parameters</div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Hue</span>
+                            <span class="control-value" id="hue-display">200°</span>
+                        </div>
+                        <input type="range" id="hue" class="control-slider" min="0" max="360" step="1" value="200"
+                               oninput="updateParameter('hue', this.value)">
+                    </div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Saturation</span>
+                            <span class="control-value" id="saturation-display">0.80</span>
+                        </div>
+                        <input type="range" id="saturation" class="control-slider" min="0" max="1" step="0.01" value="0.8"
+                               oninput="updateParameter('saturation', this.value)">
+                    </div>
+                    <div class="control-group">
+                        <div class="control-label">
+                            <span>Intensity</span>
+                            <span class="control-value" id="intensity-display">0.50</span>
+                        </div>
+                        <input type="range" id="intensity" class="control-slider" min="0" max="1" step="0.01" value="0.5"
+                               oninput="updateParameter('intensity', this.value)">
+                    </div>
                 </div>
-                <div class="reactivity-cell" onclick="document.getElementById('quantumMouse').click()">
-                    <input type="checkbox" id="quantumMouse"
-                           onchange="toggleSystemReactivity('quantum', 'mouse', this.checked)">
-                    <span class="cell-text">VEL</span>
-                </div>
-                <div class="reactivity-cell" onclick="document.getElementById('holographicMouse').click()">
-                    <input type="checkbox" id="holographicMouse"
-                           onchange="toggleSystemReactivity('holographic', 'mouse', this.checked)">
-                    <span class="cell-text">SHIMMER</span>
-                </div>
-
-                <!-- Click Row -->
-                <div class="reactivity-label">👆 Click</div>
-                <div class="reactivity-cell" onclick="document.getElementById('facetedClick').click()">
-                    <input type="checkbox" id="facetedClick"
-                           onchange="toggleSystemReactivity('faceted', 'click', this.checked)">
-                    <span class="cell-text">BURST</span>
-                </div>
-                <div class="reactivity-cell" onclick="document.getElementById('quantumClick').click()">
-                    <input type="checkbox" id="quantumClick"
-                           onchange="toggleSystemReactivity('quantum', 'click', this.checked)">
-                    <span class="cell-text">BLAST</span>
-                </div>
-                <div class="reactivity-cell" onclick="document.getElementById('holographicClick').click()">
-                    <input type="checkbox" id="holographicClick"
-                           onchange="toggleSystemReactivity('holographic', 'click', this.checked)">
-                    <span class="cell-text">RIPPLE</span>
-                </div>
-
-                <!-- Scroll Row -->
-                <div class="reactivity-label">🌀 Scroll</div>
-                <div class="reactivity-cell" onclick="document.getElementById('facetedScroll').click()">
-                    <input type="checkbox" id="facetedScroll"
-                           onchange="toggleSystemReactivity('faceted', 'scroll', this.checked)">
-                    <span class="cell-text">CYCLE</span>
-                </div>
-                <div class="reactivity-cell" onclick="document.getElementById('quantumScroll').click()">
-                    <input type="checkbox" id="quantumScroll"
-                           onchange="toggleSystemReactivity('quantum', 'scroll', this.checked)">
-                    <span class="cell-text">WAVE</span>
-                </div>
-                <div class="reactivity-cell" onclick="document.getElementById('holographicScroll').click()">
-                    <input type="checkbox" id="holographicScroll"
-                           onchange="toggleSystemReactivity('holographic', 'scroll', this.checked)">
-                    <span class="cell-text">SWEEP</span>
-                </div>
-            </div>
-
-            <div class="reactivity-note">
-                Toggle mouse, click, and scroll interactions per system
             </div>
         </div>
 
-        <!-- Audio Reactivity Matrix Grid -->
-        <div class="control-section">
-            <div class="section-title">🎵 Audio Reactivity Matrix</div>
-
-            <!-- 3×3 Audio Reactivity Grid -->
-            <div class="audio-grid">
-                <!-- Header Row -->
-                <div class="audio-header"></div>
-                <div class="audio-header">🎨 COLOR</div>
-                <div class="audio-header">🧬 GEO</div>
-                <div class="audio-header">🌀 MOVE</div>
-
-                <!-- Low Sensitivity Row -->
-                <div class="audio-label">LOW</div>
-                <div class="audio-cell" onclick="document.getElementById('lowColor').click()">
-                    <input type="checkbox" id="lowColor"
-                           onchange="toggleAudioReactivity('low', 'color', this.checked)">
-                    <span class="cell-text">30%</span>
+        <!-- Tab 3: Geometry Content -->
+        <div class="bezel-content" id="geometry-content">
+            <div class="tab-content-grid">
+                <div class="control-section" id="geometrySection">
+                    <div class="section-title">Geometry Selection</div>
+                    <div class="geometry-grid" id="geometryGrid">
+                        <!-- Geometry buttons populated by JavaScript -->
+                    </div>
                 </div>
-                <div class="audio-cell" onclick="document.getElementById('lowGeometry').click()">
-                    <input type="checkbox" id="lowGeometry"
-                           onchange="toggleAudioReactivity('low', 'geometry', this.checked)">
-                    <span class="cell-text">30%</span>
-                </div>
-                <div class="audio-cell" onclick="document.getElementById('lowMovement').click()">
-                    <input type="checkbox" id="lowMovement"
-                           onchange="toggleAudioReactivity('low', 'movement', this.checked)">
-                    <span class="cell-text">30%</span>
-                </div>
-
-                <!-- Medium Sensitivity Row -->
-                <div class="audio-label">MED</div>
-                <div class="audio-cell" onclick="document.getElementById('mediumColor').click()">
-                    <input type="checkbox" id="mediumColor" checked
-                           onchange="toggleAudioReactivity('medium', 'color', this.checked)">
-                    <span class="cell-text">100%</span>
-                </div>
-                <div class="audio-cell" onclick="document.getElementById('mediumGeometry').click()">
-                    <input type="checkbox" id="mediumGeometry"
-                           onchange="toggleAudioReactivity('medium', 'geometry', this.checked)">
-                    <span class="cell-text">100%</span>
-                </div>
-                <div class="audio-cell" onclick="document.getElementById('mediumMovement').click()">
-                    <input type="checkbox" id="mediumMovement"
-                           onchange="toggleAudioReactivity('medium', 'movement', this.checked)">
-                    <span class="cell-text">100%</span>
-                </div>
-
-                <!-- High Sensitivity Row -->
-                <div class="audio-label">HIGH</div>
-                <div class="audio-cell" onclick="document.getElementById('highColor').click()">
-                    <input type="checkbox" id="highColor"
-                           onchange="toggleAudioReactivity('high', 'color', this.checked)">
-                    <span class="cell-text">200%</span>
-                </div>
-                <div class="audio-cell" onclick="document.getElementById('highGeometry').click()">
-                    <input type="checkbox" id="highGeometry"
-                           onchange="toggleAudioReactivity('high', 'geometry', this.checked)">
-                    <span class="cell-text">200%</span>
-                </div>
-                <div class="audio-cell" onclick="document.getElementById('highMovement').click()">
-                    <input type="checkbox" id="highMovement"
-                           onchange="toggleAudioReactivity('high', 'movement', this.checked)">
-                    <span class="cell-text">200%</span>
-                </div>
-            </div>
-
-            <div class="audio-note">
-                Control audio sensitivity and which parameters react
             </div>
         </div>
 
-        <!-- Action Buttons -->
-        <div class="control-section">
-            <button class="panel-btn" onclick="randomizeAll()">🎲 Randomize Parameters</button>
-            <button class="panel-btn" onclick="randomizeEverything()">🎯 Full Random</button>
-            <button class="panel-btn" onclick="resetAll()">🔄 Reset All</button>
-            <button class="panel-btn" onclick="saveToGallery()">💾 Save to Gallery</button>
-            <button class="panel-btn" onclick="createTradingCard()">🎴 Trading Card</button>
+        <!-- Tab 4: Reactivity Content -->
+        <div class="bezel-content" id="reactivity-content">
+            <div class="tab-content-grid">
+                <!-- Interactivity Matrix -->
+                <div class="control-section">
+                    <div class="section-title">🎛️ Interactivity Matrix</div>
+                    <div class="reactivity-grid">
+                        <div class="reactivity-header"></div>
+                        <div class="reactivity-header">🔷 FACET</div>
+                        <div class="reactivity-header">🌌 QUANTUM</div>
+                        <div class="reactivity-header">✨ HOLO</div>
+
+                        <div class="reactivity-label">🖱️ Mouse</div>
+                        <div class="reactivity-cell" onclick="document.getElementById('facetedMouse').click()">
+                            <input type="checkbox" id="facetedMouse" onchange="toggleSystemReactivity('faceted', 'mouse', this.checked)">
+                            <span class="cell-text">ROT</span>
+                        </div>
+                        <div class="reactivity-cell" onclick="document.getElementById('quantumMouse').click()">
+                            <input type="checkbox" id="quantumMouse" onchange="toggleSystemReactivity('quantum', 'mouse', this.checked)">
+                            <span class="cell-text">VEL</span>
+                        </div>
+                        <div class="reactivity-cell" onclick="document.getElementById('holographicMouse').click()">
+                            <input type="checkbox" id="holographicMouse" onchange="toggleSystemReactivity('holographic', 'mouse', this.checked)">
+                            <span class="cell-text">SHIMMER</span>
+                        </div>
+
+                        <div class="reactivity-label">👆 Click</div>
+                        <div class="reactivity-cell" onclick="document.getElementById('facetedClick').click()">
+                            <input type="checkbox" id="facetedClick" onchange="toggleSystemReactivity('faceted', 'click', this.checked)">
+                            <span class="cell-text">BURST</span>
+                        </div>
+                        <div class="reactivity-cell" onclick="document.getElementById('quantumClick').click()">
+                            <input type="checkbox" id="quantumClick" onchange="toggleSystemReactivity('quantum', 'click', this.checked)">
+                            <span class="cell-text">BLAST</span>
+                        </div>
+                        <div class="reactivity-cell" onclick="document.getElementById('holographicClick').click()">
+                            <input type="checkbox" id="holographicClick" onchange="toggleSystemReactivity('holographic', 'click', this.checked)">
+                            <span class="cell-text">RIPPLE</span>
+                        </div>
+
+                        <div class="reactivity-label">🌀 Scroll</div>
+                        <div class="reactivity-cell" onclick="document.getElementById('facetedScroll').click()">
+                            <input type="checkbox" id="facetedScroll" onchange="toggleSystemReactivity('faceted', 'scroll', this.checked)">
+                            <span class="cell-text">CYCLE</span>
+                        </div>
+                        <div class="reactivity-cell" onclick="document.getElementById('quantumScroll').click()">
+                            <input type="checkbox" id="quantumScroll" onchange="toggleSystemReactivity('quantum', 'scroll', this.checked)">
+                            <span class="cell-text">WAVE</span>
+                        </div>
+                        <div class="reactivity-cell" onclick="document.getElementById('holographicScroll').click()">
+                            <input type="checkbox" id="holographicScroll" onchange="toggleSystemReactivity('holographic', 'scroll', this.checked)">
+                            <span class="cell-text">SWEEP</span>
+                        </div>
+                    </div>
+                    <div class="reactivity-note">Toggle mouse, click, and scroll interactions per system</div>
+                </div>
+
+                <!-- Audio Reactivity Matrix -->
+                <div class="control-section">
+                    <div class="section-title">🎵 Audio Reactivity Matrix</div>
+                    <div class="audio-grid">
+                        <div class="audio-header"></div>
+                        <div class="audio-header">🎨 COLOR</div>
+                        <div class="audio-header">🧬 GEO</div>
+                        <div class="audio-header">🌀 MOVE</div>
+
+                        <div class="audio-label">LOW</div>
+                        <div class="audio-cell" onclick="document.getElementById('lowColor').click()">
+                            <input type="checkbox" id="lowColor" onchange="toggleAudioReactivity('low', 'color', this.checked)">
+                            <span class="cell-text">30%</span>
+                        </div>
+                        <div class="audio-cell" onclick="document.getElementById('lowGeometry').click()">
+                            <input type="checkbox" id="lowGeometry" onchange="toggleAudioReactivity('low', 'geometry', this.checked)">
+                            <span class="cell-text">30%</span>
+                        </div>
+                        <div class="audio-cell" onclick="document.getElementById('lowMovement').click()">
+                            <input type="checkbox" id="lowMovement" onchange="toggleAudioReactivity('low', 'movement', this.checked)">
+                            <span class="cell-text">30%</span>
+                        </div>
+
+                        <div class="audio-label">MED</div>
+                        <div class="audio-cell" onclick="document.getElementById('mediumColor').click()">
+                            <input type="checkbox" id="mediumColor" checked onchange="toggleAudioReactivity('medium', 'color', this.checked)">
+                            <span class="cell-text">100%</span>
+                        </div>
+                        <div class="audio-cell" onclick="document.getElementById('mediumGeometry').click()">
+                            <input type="checkbox" id="mediumGeometry" onchange="toggleAudioReactivity('medium', 'geometry', this.checked)">
+                            <span class="cell-text">100%</span>
+                        </div>
+                        <div class="audio-cell" onclick="document.getElementById('mediumMovement').click()">
+                            <input type="checkbox" id="mediumMovement" onchange="toggleAudioReactivity('medium', 'movement', this.checked)">
+                            <span class="cell-text">100%</span>
+                        </div>
+
+                        <div class="audio-label">HIGH</div>
+                        <div class="audio-cell" onclick="document.getElementById('highColor').click()">
+                            <input type="checkbox" id="highColor" onchange="toggleAudioReactivity('high', 'color', this.checked)">
+                            <span class="cell-text">200%</span>
+                        </div>
+                        <div class="audio-cell" onclick="document.getElementById('highGeometry').click()">
+                            <input type="checkbox" id="highGeometry" onchange="toggleAudioReactivity('high', 'geometry', this.checked)">
+                            <span class="cell-text">200%</span>
+                        </div>
+                        <div class="audio-cell" onclick="document.getElementById('highMovement').click()">
+                            <input type="checkbox" id="highMovement" onchange="toggleAudioReactivity('high', 'movement', this.checked)">
+                            <span class="cell-text">200%</span>
+                        </div>
+                    </div>
+                    <div class="audio-note">Control audio sensitivity and which parameters react</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 5: Export Content -->
+        <div class="bezel-content" id="export-content">
+            <div class="tab-content-grid">
+                <div class="control-section">
+                    <div class="section-title">Actions & Export</div>
+                    <div class="action-button-row">
+                        <button class="panel-btn" onclick="randomizeAll()">🎲 Randomize Parameters</button>
+                        <button class="panel-btn" onclick="randomizeEverything()">🎯 Full Random</button>
+                        <button class="panel-btn" onclick="resetAll()">🔄 Reset All</button>
+                        <button class="panel-btn" onclick="saveToGallery()">💾 Save to Gallery</button>
+                        <button class="panel-btn" onclick="createTradingCard()">🎴 Trading Card</button>
+                        <button class="panel-btn" onclick="openGallery()">🖼️ Open Gallery</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -369,6 +381,7 @@
     <script type="module" src="js/controls/ui-handlers.js"></script>
     <script type="module" src="js/gallery/gallery-manager.js"></script>
     <script type="module" src="js/gallery/gallery-modal.js"></script>
+    <script type="module" src="js/ui/bezel-tabs.js"></script>
     <script type="module" src="js/interactions/device-tilt.js"></script>
     
     <!-- Initialize globals and user parameter state BEFORE main app -->
