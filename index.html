@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="styles/reactivity.css">
     <link rel="stylesheet" href="styles/gallery-modal.css">
     <link rel="stylesheet" href="styles/bottom-bezel.css">
+    <link rel="stylesheet" href="styles/geometry-tabs.css">
     <link rel="stylesheet" href="styles/mobile.css">
     <link rel="stylesheet" href="styles/animations.css">
 </head>
@@ -227,13 +228,30 @@
             </div>
         </div>
 
-        <!-- Tab 3: Geometry Content -->
+        <!-- Tab 3: Geometry Content (8 Base + 3 Core Tabs = 24 Geometries) -->
         <div class="bezel-content" id="geometry-content">
             <div class="tab-content-grid">
-                <div class="control-section" id="geometrySection">
-                    <div class="section-title">Geometry Selection</div>
-                    <div class="geometry-grid" id="geometryGrid">
-                        <!-- Geometry buttons populated by JavaScript -->
+                <div class="control-section">
+                    <div class="section-title">📐 24 Geometry System</div>
+                    <div class="geometry-container" data-active-core="base">
+                        <!-- Core Type Tabs (3 tabs) -->
+                        <div id="coreTabsContainer">
+                            <!-- Populated by geometry-tabs.js -->
+                        </div>
+
+                        <!-- Base Geometry Buttons (8 buttons) -->
+                        <div class="geometry-grid" id="geometryGrid">
+                            <!-- Populated by geometry-tabs.js -->
+                        </div>
+                    </div>
+
+                    <!-- Geometry Info Display -->
+                    <div style="margin-top: 15px; padding: 12px; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(0, 255, 255, 0.15); border-radius: 8px;">
+                        <div style="font-family: 'Orbitron', monospace; font-size: 0.75rem; color: rgba(255, 255, 255, 0.7); text-align: center;">
+                            <strong style="color: #00ffff;">Active Geometry:</strong>
+                            <span data-geometry-display style="color: #ffffff;">Tetrahedron</span>
+                            <span style="opacity: 0.6; margin-left: 10px;">(#<span data-geometry-display data-geometry-index="0">0</span>)</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -382,6 +400,7 @@
     <script type="module" src="js/gallery/gallery-manager.js"></script>
     <script type="module" src="js/gallery/gallery-modal.js"></script>
     <script type="module" src="js/ui/bezel-tabs.js"></script>
+    <script type="module" src="js/geometry/geometry-tabs.js"></script>
     <script type="module" src="js/interactions/device-tilt.js"></script>
     
     <!-- Initialize globals and user parameter state BEFORE main app -->
