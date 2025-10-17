@@ -22,16 +22,22 @@ export class DeviceTiltHandler {
         this.tiltIntensity = 0;
         this.extremeTilt = false;
         
-        // Smoothed 4D rotation values
+        // Smoothed 6D rotation values
         this.smoothedRotation = {
-            rot4dXW: 0,
+            rot4dXY: 0, // 3D space rotations
+            rot4dXZ: 0,
+            rot4dYZ: 0,
+            rot4dXW: 0, // 4D hyperspace rotations
             rot4dYW: 0,
             rot4dZW: 0
         };
-        
+
         // Base rotation values (from presets/manual control)
         this.baseRotation = {
-            rot4dXW: 0,
+            rot4dXY: 0, // 3D space rotations
+            rot4dXZ: 0,
+            rot4dYZ: 0,
+            rot4dXW: 0, // 4D hyperspace rotations
             rot4dYW: 0,
             rot4dZW: 0
         };
@@ -40,13 +46,34 @@ export class DeviceTiltHandler {
         this.mapping = {
             // 🔷 NORMAL MODE: Conservative mapping (original behavior)
             normal: {
+                // 3D SPACE ROTATIONS - Secondary mappings (lower sensitivity)
+                // Combined alpha+gamma -> 3D XY rotation
+                alphaGammaToXY: {
+                    scale: 0.004, // Half sensitivity of 4D rotations
+                    range: [-180, 180],
+                    clamp: [-1.0, 1.0]
+                },
+                // Combined alpha+beta -> 3D XZ rotation
+                alphaBetaToXZ: {
+                    scale: 0.005,
+                    range: [-180, 180],
+                    clamp: [-1.0, 1.0]
+                },
+                // Combined beta+gamma -> 3D YZ rotation
+                betaGammaToYZ: {
+                    scale: 0.006,
+                    range: [-90, 90],
+                    clamp: [-1.0, 1.0]
+                },
+
+                // 4D HYPERSPACE ROTATIONS - Primary mappings
                 // Device beta (front-back tilt) -> 4D XW rotation
                 betaToXW: {
                     scale: 0.01, // Radians per degree of device tilt
                     range: [-45, 45], // Degrees of device tilt to use
                     clamp: [-1.5, 1.5] // 4D rotation limits (radians)
                 },
-                // Device gamma (left-right tilt) -> 4D YW rotation  
+                // Device gamma (left-right tilt) -> 4D YW rotation
                 gammaToYW: {
                     scale: 0.015,
                     range: [-30, 30],
@@ -62,13 +89,31 @@ export class DeviceTiltHandler {
             
             // 🚀 DRAMATIC MODE: 8x more sensitive with extended range
             dramatic: {
+                // 3D SPACE ROTATIONS - Secondary mappings (dramatic sensitivity)
+                alphaGammaToXY: {
+                    scale: 0.032, // 8x more sensitive
+                    range: [-180, 180],
+                    clamp: [-6.0, 6.0]
+                },
+                alphaBetaToXZ: {
+                    scale: 0.04, // 8x more sensitive
+                    range: [-180, 180],
+                    clamp: [-6.0, 6.0]
+                },
+                betaGammaToYZ: {
+                    scale: 0.048, // 8x more sensitive
+                    range: [-120, 120],
+                    clamp: [-6.0, 6.0]
+                },
+
+                // 4D HYPERSPACE ROTATIONS - Primary mappings
                 // Device beta (front-back tilt) -> 4D XW rotation
                 betaToXW: {
                     scale: 0.08, // 8x more sensitive!
                     range: [-120, 120], // Extended range for dramatic effects
                     clamp: [-6.0, 6.0] // Much wider 4D rotation limits
                 },
-                // Device gamma (left-right tilt) -> 4D YW rotation  
+                // Device gamma (left-right tilt) -> 4D YW rotation
                 gammaToYW: {
                     scale: 0.12, // 8x more sensitive!
                     range: [-120, 120], // Extended range
@@ -143,8 +188,11 @@ export class DeviceTiltHandler {
             return false;
         }
         
-        // Store current parameter values as base
+        // Store current parameter values as base (all 6 rotations)
         if (window.userParameterState) {
+            this.baseRotation.rot4dXY = window.userParameterState.rot4dXY || 0;
+            this.baseRotation.rot4dXZ = window.userParameterState.rot4dXZ || 0;
+            this.baseRotation.rot4dYZ = window.userParameterState.rot4dYZ || 0;
             this.baseRotation.rot4dXW = window.userParameterState.rot4dXW || 0;
             this.baseRotation.rot4dYW = window.userParameterState.rot4dYW || 0;
             this.baseRotation.rot4dZW = window.userParameterState.rot4dZW || 0;
@@ -172,8 +220,11 @@ export class DeviceTiltHandler {
         window.removeEventListener('deviceorientation', this.boundHandleDeviceOrientation);
         this.isEnabled = false;
         
-        // Reset to base rotation values
+        // Reset to base rotation values (all 6 rotations)
         if (window.updateParameter) {
+            window.updateParameter('rot4dXY', this.baseRotation.rot4dXY);
+            window.updateParameter('rot4dXZ', this.baseRotation.rot4dXZ);
+            window.updateParameter('rot4dYZ', this.baseRotation.rot4dYZ);
             window.updateParameter('rot4dXW', this.baseRotation.rot4dXW);
             window.updateParameter('rot4dYW', this.baseRotation.rot4dYW);
             window.updateParameter('rot4dZW', this.baseRotation.rot4dZW);
@@ -199,30 +250,51 @@ export class DeviceTiltHandler {
         // Update current tilt values
         this.currentTilt = { alpha, beta, gamma };
         
-        // Map device orientation to 4D rotation values
+        // Map device orientation to 6D rotation values
         const targetRotation = this.mapToRotation(event);
-        
-        // Apply smoothing to prevent jittery movement
+
+        // Apply smoothing to prevent jittery movement (all 6 rotations)
+        this.smoothedRotation.rot4dXY = this.lerp(
+            this.smoothedRotation.rot4dXY,
+            targetRotation.rot4dXY,
+            this.smoothing
+        );
+
+        this.smoothedRotation.rot4dXZ = this.lerp(
+            this.smoothedRotation.rot4dXZ,
+            targetRotation.rot4dXZ,
+            this.smoothing
+        );
+
+        this.smoothedRotation.rot4dYZ = this.lerp(
+            this.smoothedRotation.rot4dYZ,
+            targetRotation.rot4dYZ,
+            this.smoothing
+        );
+
         this.smoothedRotation.rot4dXW = this.lerp(
             this.smoothedRotation.rot4dXW,
             targetRotation.rot4dXW,
             this.smoothing
         );
-        
+
         this.smoothedRotation.rot4dYW = this.lerp(
             this.smoothedRotation.rot4dYW,
             targetRotation.rot4dYW,
             this.smoothing
         );
-        
+
         this.smoothedRotation.rot4dZW = this.lerp(
             this.smoothedRotation.rot4dZW,
             targetRotation.rot4dZW,
             this.smoothing
         );
-        
-        // Apply to visualization system
+
+        // Apply to visualization system (all 6 rotations)
         if (window.updateParameter) {
+            window.updateParameter('rot4dXY', this.smoothedRotation.rot4dXY);
+            window.updateParameter('rot4dXZ', this.smoothedRotation.rot4dXZ);
+            window.updateParameter('rot4dYZ', this.smoothedRotation.rot4dYZ);
             window.updateParameter('rot4dXW', this.smoothedRotation.rot4dXW);
             window.updateParameter('rot4dYW', this.smoothedRotation.rot4dYW);
             window.updateParameter('rot4dZW', this.smoothedRotation.rot4dZW);
@@ -233,44 +305,75 @@ export class DeviceTiltHandler {
     }
     
     /**
-     * Map device orientation to 4D rotation parameters
+     * Map device orientation to 6D rotation parameters
      */
     mapToRotation(event) {
         const betaDeg = event.beta || 0;  // Front-back tilt (-180 to 180)
         const gammaDeg = event.gamma || 0; // Left-right tilt (-90 to 90)
         const alphaDeg = event.alpha || 0; // Compass heading (0 to 360)
-        
+
         // 🚀 DRAMATIC MODE: Choose mapping configuration
         const activeMapping = this.dramaticMode ? this.mapping.dramatic : this.mapping.normal;
-        
+
         // 🚀 CALCULATE TILT INTENSITY for dramatic effects
         const betaNorm = Math.max(-120, Math.min(120, betaDeg));
         const gammaNorm = Math.max(-120, Math.min(120, gammaDeg));
         this.tiltIntensity = Math.sqrt(betaNorm*betaNorm + gammaNorm*gammaNorm) / 90;
         this.extremeTilt = this.tiltIntensity > 1.0;
-        
+
+        // Normalize alpha to -180 to 180 range
+        let alphaNormalized = alphaDeg;
+        if (alphaNormalized > 180) alphaNormalized -= 360;
+
+        // === 3D SPACE ROTATIONS (Secondary mappings) ===
+        // Map combined alpha+gamma to XY rotation (compass + left-right)
+        const alphaGammaCombined = (alphaNormalized + gammaDeg) / 2;
+        const agClamped = Math.max(activeMapping.alphaGammaToXY.range[0],
+            Math.min(activeMapping.alphaGammaToXY.range[1], alphaGammaCombined));
+        const rot4dXY = this.baseRotation.rot4dXY +
+            (agClamped * activeMapping.alphaGammaToXY.scale * this.sensitivity);
+
+        // Map combined alpha+beta to XZ rotation (compass + front-back)
+        const alphaBetaCombined = (alphaNormalized + betaDeg) / 2;
+        const abClamped = Math.max(activeMapping.alphaBetaToXZ.range[0],
+            Math.min(activeMapping.alphaBetaToXZ.range[1], alphaBetaCombined));
+        const rot4dXZ = this.baseRotation.rot4dXZ +
+            (abClamped * activeMapping.alphaBetaToXZ.scale * this.sensitivity);
+
+        // Map combined beta+gamma to YZ rotation (front-back + left-right)
+        const betaGammaCombined = (betaDeg + gammaDeg) / 2;
+        const bgClamped = Math.max(activeMapping.betaGammaToYZ.range[0],
+            Math.min(activeMapping.betaGammaToYZ.range[1], betaGammaCombined));
+        const rot4dYZ = this.baseRotation.rot4dYZ +
+            (bgClamped * activeMapping.betaGammaToYZ.scale * this.sensitivity);
+
+        // === 4D HYPERSPACE ROTATIONS (Primary mappings) ===
         // Map beta (front-back tilt) to XW rotation
-        const betaClamped = Math.max(activeMapping.betaToXW.range[0], 
+        const betaClamped = Math.max(activeMapping.betaToXW.range[0],
             Math.min(activeMapping.betaToXW.range[1], betaDeg));
-        const rot4dXW = this.baseRotation.rot4dXW + 
+        const rot4dXW = this.baseRotation.rot4dXW +
             (betaClamped * activeMapping.betaToXW.scale * this.sensitivity);
-        
+
         // Map gamma (left-right tilt) to YW rotation
         const gammaClamped = Math.max(activeMapping.gammaToYW.range[0],
             Math.min(activeMapping.gammaToYW.range[1], gammaDeg));
-        const rot4dYW = this.baseRotation.rot4dYW + 
+        const rot4dYW = this.baseRotation.rot4dYW +
             (gammaClamped * activeMapping.gammaToYW.scale * this.sensitivity);
-        
+
         // Map alpha (compass) to ZW rotation
-        let alphaNormalized = alphaDeg;
-        if (alphaNormalized > 180) alphaNormalized -= 360; // Normalize to -180 to 180
         const alphaClamped = Math.max(activeMapping.alphaToZW.range[0],
             Math.min(activeMapping.alphaToZW.range[1], alphaNormalized));
-        const rot4dZW = this.baseRotation.rot4dZW + 
+        const rot4dZW = this.baseRotation.rot4dZW +
             (alphaClamped * activeMapping.alphaToZW.scale * this.sensitivity);
-        
+
         // Apply final clamping to prevent extreme values
         return {
+            rot4dXY: Math.max(activeMapping.alphaGammaToXY.clamp[0],
+                Math.min(activeMapping.alphaGammaToXY.clamp[1], rot4dXY)),
+            rot4dXZ: Math.max(activeMapping.alphaBetaToXZ.clamp[0],
+                Math.min(activeMapping.alphaBetaToXZ.clamp[1], rot4dXZ)),
+            rot4dYZ: Math.max(activeMapping.betaGammaToYZ.clamp[0],
+                Math.min(activeMapping.betaGammaToYZ.clamp[1], rot4dYZ)),
             rot4dXW: Math.max(activeMapping.betaToXW.clamp[0],
                 Math.min(activeMapping.betaToXW.clamp[1], rot4dXW)),
             rot4dYW: Math.max(activeMapping.gammaToYW.clamp[0],
@@ -290,12 +393,15 @@ export class DeviceTiltHandler {
     /**
      * Update base rotation values (from preset loading or manual adjustment)
      */
-    updateBaseRotation(rot4dXW, rot4dYW, rot4dZW) {
+    updateBaseRotation(rot4dXY, rot4dXZ, rot4dYZ, rot4dXW, rot4dYW, rot4dZW) {
+        this.baseRotation.rot4dXY = rot4dXY || 0;
+        this.baseRotation.rot4dXZ = rot4dXZ || 0;
+        this.baseRotation.rot4dYZ = rot4dYZ || 0;
         this.baseRotation.rot4dXW = rot4dXW || 0;
         this.baseRotation.rot4dYW = rot4dYW || 0;
         this.baseRotation.rot4dZW = rot4dZW || 0;
-        
-        console.log('🎯 DEVICE TILT: Base rotation updated:', this.baseRotation);
+
+        console.log('🎯 DEVICE TILT: Base rotation updated (all 6 rotations):', this.baseRotation);
     }
     
     /**
@@ -351,13 +457,18 @@ export class DeviceTiltHandler {
             indicator.innerHTML = `
                 <div class="tilt-status">
                     <div class="tilt-icon">📱</div>
-                    <div class="tilt-text">4D Tilt Active</div>
+                    <div class="tilt-text">6D Tilt Active</div>
                     <div class="tilt-mode" id="tilt-mode">NORMAL MODE</div>
                     <div class="tilt-values">
+                        <div style="color: #0ff; font-weight: bold; margin-top: 4px;">3D Space:</div>
+                        <span id="tilt-xy">XY: 0.00</span>
+                        <span id="tilt-xz">XZ: 0.00</span>
+                        <span id="tilt-yz">YZ: 0.00</span>
+                        <div style="color: #0ff; font-weight: bold; margin-top: 4px;">4D Hyperspace:</div>
                         <span id="tilt-xw">XW: 0.00</span>
                         <span id="tilt-yw">YW: 0.00</span>
                         <span id="tilt-zw">ZW: 0.00</span>
-                        <span id="tilt-intensity">Intensity: 0.00</span>
+                        <span id="tilt-intensity" style="margin-top: 4px;">Intensity: 0.00</span>
                     </div>
                 </div>
             `;
@@ -386,14 +497,23 @@ export class DeviceTiltHandler {
     }
     
     /**
-     * Update tilt display values
+     * Update tilt display values (all 6 rotations)
      */
     updateTiltDisplay() {
+        // 3D Space rotations
+        const xyDisplay = document.getElementById('tilt-xy');
+        const xzDisplay = document.getElementById('tilt-xz');
+        const yzDisplay = document.getElementById('tilt-yz');
+
+        // 4D Hyperspace rotations
         const xwDisplay = document.getElementById('tilt-xw');
         const ywDisplay = document.getElementById('tilt-yw');
         const zwDisplay = document.getElementById('tilt-zw');
         const intensityDisplay = document.getElementById('tilt-intensity');
-        
+
+        if (xyDisplay) xyDisplay.textContent = `XY: ${this.smoothedRotation.rot4dXY.toFixed(2)}`;
+        if (xzDisplay) xzDisplay.textContent = `XZ: ${this.smoothedRotation.rot4dXZ.toFixed(2)}`;
+        if (yzDisplay) yzDisplay.textContent = `YZ: ${this.smoothedRotation.rot4dYZ.toFixed(2)}`;
         if (xwDisplay) xwDisplay.textContent = `XW: ${this.smoothedRotation.rot4dXW.toFixed(2)}`;
         if (ywDisplay) ywDisplay.textContent = `YW: ${this.smoothedRotation.rot4dYW.toFixed(2)}`;
         if (zwDisplay) zwDisplay.textContent = `ZW: ${this.smoothedRotation.rot4dZW.toFixed(2)}`;

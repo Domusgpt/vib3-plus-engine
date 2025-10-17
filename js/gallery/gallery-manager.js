@@ -156,13 +156,19 @@ window.createTradingCard = async function(format = 'classic') {
         // Dynamic import of TradingCardManager
         const { TradingCardManager } = await import('../../src/export/TradingCardManager.js');
         
-        // Get current parameters
+        // Get current parameters (all 6 rotations)
         const parameters = {
             system: window.currentSystem || 'faceted',
             geometry: getActiveGeometryIndex(),
+            // 3D space rotations
+            rot4dXY: parseFloat(document.getElementById('rot4dXY')?.value || 0),
+            rot4dXZ: parseFloat(document.getElementById('rot4dXZ')?.value || 0),
+            rot4dYZ: parseFloat(document.getElementById('rot4dYZ')?.value || 0),
+            // 4D hyperspace rotations
             rot4dXW: parseFloat(document.getElementById('rot4dXW').value),
             rot4dYW: parseFloat(document.getElementById('rot4dYW').value),
             rot4dZW: parseFloat(document.getElementById('rot4dZW').value),
+            // Visual parameters
             gridDensity: parseFloat(document.getElementById('gridDensity').value),
             morphFactor: parseFloat(document.getElementById('morphFactor').value),
             chaos: parseFloat(document.getElementById('chaos').value),

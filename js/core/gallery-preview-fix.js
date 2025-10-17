@@ -164,9 +164,9 @@ export class GalleryPreviewFix {
         await new Promise(resolve => setTimeout(resolve, 100));
         
         try {
-            // Update global parameter state with all 13 parameters
+            // Update global parameter state with all parameters (including 6D rotation)
             if (window.userParameterState) {
-                // Ensure all 13 parameters are included with defaults if missing
+                // Ensure all parameters are included with defaults if missing
                 const fullParameters = {
                     variation: 0,
                     geometry: 0,
@@ -177,6 +177,11 @@ export class GalleryPreviewFix {
                     hue: 0,
                     saturation: 0.8,
                     intensity: 0.5,
+                    // 3D space rotations
+                    rot4dXY: 0.0,
+                    rot4dXZ: 0.0,
+                    rot4dYZ: 0.0,
+                    // 4D hyperspace rotations
                     rot4dXW: 0.0,
                     rot4dYW: 0.0,
                     rot4dZW: 0.0,
@@ -188,9 +193,25 @@ export class GalleryPreviewFix {
                 console.log(`🚀 ENHANCED: Global state updated with ${Object.keys(fullParameters).length} parameters`);
             }
             
-            // Apply 4D rotation parameters first (critical for spatial positioning)
-            const rotationParams = ['rot4dXW', 'rot4dYW', 'rot4dZW'];
-            rotationParams.forEach(param => {
+            // Apply 6D rotation parameters first (critical for spatial positioning)
+            // 3D space rotations (XY, XZ, YZ)
+            const rotation3DParams = ['rot4dXY', 'rot4dXZ', 'rot4dYZ'];
+            rotation3DParams.forEach(param => {
+                if (parameters[param] !== undefined) {
+                    try {
+                        if (window.updateParameter) {
+                            window.updateParameter(param, parameters[param]);
+                            console.log(`🚀 3D ROTATION: ${param} = ${parameters[param].toFixed(4)}`);
+                        }
+                    } catch (error) {
+                        console.warn(`🚀 3D ROTATION ${param} failed:`, error.message);
+                    }
+                }
+            });
+
+            // 4D hyperspace rotations (XW, YW, ZW)
+            const rotation4DParams = ['rot4dXW', 'rot4dYW', 'rot4dZW'];
+            rotation4DParams.forEach(param => {
                 if (parameters[param] !== undefined) {
                     try {
                         if (window.updateParameter) {

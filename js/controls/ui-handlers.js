@@ -18,16 +18,19 @@ window.updateParameter = function(param, value) {
     console.log(`💾 User parameter: ${param} = ${value}`);
     
     const displays = {
-        rot4dXW: 'xwValue',
-        rot4dYW: 'ywValue', 
-        rot4dZW: 'zwValue',
-        gridDensity: 'densityValue',
-        morphFactor: 'morphValue',
-        chaos: 'chaosValue',
-        speed: 'speedValue',
-        hue: 'hueValue',
-        intensity: 'intensityValue',
-        saturation: 'saturationValue'
+        rot4dXY: 'rot4dXY-display',
+        rot4dXZ: 'rot4dXZ-display',
+        rot4dYZ: 'rot4dYZ-display',
+        rot4dXW: 'rot4dXW-display',
+        rot4dYW: 'rot4dYW-display',
+        rot4dZW: 'rot4dZW-display',
+        gridDensity: 'gridDensity-display',
+        morphFactor: 'morphFactor-display',
+        chaos: 'chaos-display',
+        speed: 'speed-display',
+        hue: 'hue-display',
+        intensity: 'intensity-display',
+        saturation: 'saturation-display'
     };
     
     const display = document.getElementById(displays[param]);

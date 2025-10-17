@@ -10,10 +10,14 @@ export class ParameterManager {
             // Current variation
             variation: 0,
             
-            // 4D Polytopal Mathematics
-            rot4dXW: 0.0,      // X-W plane rotation (-2 to 2)
-            rot4dYW: 0.0,      // Y-W plane rotation (-2 to 2) 
-            rot4dZW: 0.0,      // Z-W plane rotation (-2 to 2)
+            // 6D Rotation - 3D space rotations
+            rot4dXY: 0.0,      // X-Y plane rotation (-6.28 to 6.28)
+            rot4dXZ: 0.0,      // X-Z plane rotation (-6.28 to 6.28)
+            rot4dYZ: 0.0,      // Y-Z plane rotation (-6.28 to 6.28)
+            // 4D hyperspace rotations
+            rot4dXW: 0.0,      // X-W plane rotation (-6.28 to 6.28)
+            rot4dYW: 0.0,      // Y-W plane rotation (-6.28 to 6.28)
+            rot4dZW: 0.0,      // Z-W plane rotation (-6.28 to 6.28)
             dimension: 3.5,    // Dimensional level (3.0 to 4.5)
             
             // Holographic Visualization
