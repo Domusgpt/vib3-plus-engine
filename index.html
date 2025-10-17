@@ -3,1005 +3,528 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIB3+ Engine - Unified Visualization System</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 100%);
-            color: #e0e0e0;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        header {
-            background: rgba(26, 26, 46, 0.9);
-            backdrop-filter: blur(10px);
-            padding: 1.5rem;
-            border-bottom: 2px solid #00ffcc;
-            box-shadow: 0 4px 20px rgba(0, 255, 204, 0.2);
-        }
-
-        h1 {
-            font-size: 2rem;
-            background: linear-gradient(135deg, #00ffcc, #0099ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 0.5rem;
-        }
-
-        .subtitle {
-            color: #888;
-            font-size: 0.9rem;
-        }
-
-        main {
-            flex: 1;
-            display: grid;
-            grid-template-columns: 400px 1fr;
-            gap: 1.5rem;
-            padding: 1.5rem;
-            overflow: hidden;
-        }
-
-        .controls {
-            background: rgba(10, 10, 26, 0.95);
-            backdrop-filter: blur(20px);
-            border: 2px solid #00ffcc;
-            border-radius: 16px;
-            padding: 2rem;
-            overflow-y: auto;
-            max-height: calc(100vh - 150px);
-            box-shadow: 0 8px 32px rgba(0, 255, 204, 0.3);
-        }
-
-        .control-group {
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #00ffcc22;
-        }
-
-        .control-group h3 {
-            color: #00ffcc;
-            margin-bottom: 1rem;
-            font-size: 1rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            border-bottom: 2px solid #00ffcc44;
-            padding-bottom: 0.5rem;
-        }
-
-        button {
-            width: 100%;
-            padding: 1rem;
-            margin-bottom: 0.75rem;
-            background: linear-gradient(135deg, #00ffcc11, #0099ff11);
-            border: 2px solid #00ffcc66;
-            color: #00ffcc;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 1rem;
-            font-weight: 600;
-            transition: all 0.2s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(0, 255, 204, 0.2), transparent);
-            transition: left 0.5s ease;
-        }
-
-        button:hover::before {
-            left: 100%;
-        }
-
-        button:hover {
-            background: linear-gradient(135deg, #00ffcc33, #0099ff33);
-            border-color: #00ffcc;
-            box-shadow: 0 0 30px rgba(0, 255, 204, 0.5);
-            transform: translateY(-3px);
-        }
-
-        button.active {
-            background: linear-gradient(135deg, #00ffcc, #0099ff);
-            color: #000;
-            border-color: #00ff88;
-            box-shadow: 0 0 40px rgba(0, 255, 204, 0.8);
-            font-weight: 700;
-        }
-
-        .system-btn {
-            font-size: 1.1rem;
-            padding: 1.25rem;
-        }
-
-        .toggle-btn {
-            padding: 0.5rem;
-            font-size: 0.85rem;
-        }
-
-        .toggle-btn.active {
-            background: linear-gradient(135deg, #00ff88, #00ffcc);
-            border-color: #00ff88;
-        }
-
-        .toggle-btn:not(.active) {
-            opacity: 0.5;
-        }
-
-        select {
-            width: 100%;
-            padding: 0.5rem;
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid #00ffcc44;
-            color: #e0e0e0;
-            border-radius: 6px;
-            margin-bottom: 0.5rem;
-        }
-
-        .slider-control {
-            margin-bottom: 1rem;
-        }
-
-        .slider-label {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.3rem;
-            font-size: 0.85rem;
-            color: #aaa;
-        }
-
-        .slider-value {
-            color: #00ffcc;
-            font-weight: bold;
-        }
-
-        input[type="range"] {
-            width: 100%;
-            height: 6px;
-            background: rgba(0, 255, 204, 0.2);
-            border-radius: 3px;
-            outline: none;
-            -webkit-appearance: none;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
-            background: #00ffcc;
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
-        }
-
-        input[type="range"]::-moz-range-thumb {
-            width: 16px;
-            height: 16px;
-            background: #00ffcc;
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
-            border: none;
-        }
-
-        .canvas-container {
-            background: rgba(0, 0, 0, 0.5);
-            border: 2px solid #00ffcc44;
-            border-radius: 12px;
-            overflow: hidden;
-            position: relative;
-            min-height: 600px;
-        }
-
-        .canvas-container::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(
-                45deg,
-                transparent 15%,
-                rgba(0, 255, 255, 0.15) 40%,
-                rgba(255, 0, 255, 0.2) 50%,
-                rgba(255, 100, 0, 0.15) 60%,
-                transparent 85%
-            );
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            mix-blend-mode: screen;
-            pointer-events: none;
-        }
-
-        .canvas-container:hover::after {
-            opacity: 1;
-        }
-
-        #vib3-container {
-            width: 100%;
-            height: 100%;
-            position: relative;
-        }
-
-        .status {
-            position: absolute;
-            top: 1rem;
-            left: 1rem;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            border: 1px solid #00ffcc44;
-            font-size: 0.85rem;
-        }
-
-        .status.ready {
-            border-color: #00ff88;
-            color: #00ff88;
-        }
-
-        .system-badge {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 0.5rem 1rem;
-            border-radius: 6px;
-            border: 2px solid #00ffcc;
-            font-size: 0.85rem;
-            font-weight: bold;
-            color: #00ffcc;
-        }
-
-        /* Gallery Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 1000;
-            overflow: auto;
-        }
-
-        .modal.active {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            background: linear-gradient(135deg, #1a1a2e 0%, #0a0a1a 100%);
-            border: 2px solid #00ffcc;
-            border-radius: 16px;
-            max-width: 95%;
-            max-height: 95%;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .gallery-header {
-            background: rgba(0, 0, 0, 0.5);
-            padding: 1.5rem;
-            border-bottom: 2px solid #00ffcc;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .gallery-header h2 {
-            margin: 0;
-            color: #00ffcc;
-            font-size: 1.5rem;
-        }
-
-        .gallery-controls {
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .gallery-controls button {
-            padding: 0.5rem 1rem;
-            background: linear-gradient(135deg, #00ffcc22, #0099ff22);
-            border: 1px solid #00ffcc;
-            color: #00ffcc;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: all 0.3s ease;
-        }
-
-        .gallery-controls button:hover {
-            background: linear-gradient(135deg, #00ffcc44, #0099ff44);
-            box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
-        }
-
-        .gallery-controls button.active {
-            background: linear-gradient(135deg, #00ffcc, #0099ff);
-            color: #000;
-        }
-
-        .gallery-body {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
-
-        .gallery-sidebar {
-            width: 320px;
-            background: rgba(0, 0, 0, 0.3);
-            border-right: 1px solid #00ffcc44;
-            padding: 1rem;
-            overflow-y: auto;
-        }
-
-        .preview-container {
-            margin-bottom: 1rem;
-        }
-
-        #galleryPreviewCanvas {
-            width: 100%;
-            border: 2px solid #00ffcc44;
-            border-radius: 8px;
-            margin-bottom: 0.5rem;
-        }
-
-        .preview-info {
-            font-size: 0.9rem;
-        }
-
-        .preview-title {
-            color: #00ffcc;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-        }
-
-        .preview-system {
-            color: #0099ff;
-            margin-bottom: 0.3rem;
-        }
-
-        .preview-details {
-            color: #aaa;
-            font-size: 0.85rem;
-        }
-
-        .preview-details div {
-            margin-bottom: 0.2rem;
-        }
-
-        .gallery-stats {
-            border-top: 1px solid #00ffcc44;
-            padding-top: 1rem;
-        }
-
-        .stat-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 0.5rem;
-            font-size: 0.85rem;
-        }
-
-        .stat-label {
-            color: #888;
-        }
-
-        .stat-value {
-            color: #00ffcc;
-            font-weight: bold;
-        }
-
-        .gallery-grid-container {
-            flex: 1;
-            overflow-y: auto;
-            padding: 1rem;
-        }
-
-        .gallery-section {
-            margin-bottom: 2rem;
-        }
-
-        .geometry-header {
-            color: #00ffcc;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid #00ffcc44;
-        }
-
-        .gallery-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-            gap: 1rem;
-        }
-
-        .gallery-thumbnail {
-            background: rgba(0, 0, 0, 0.5);
-            border: 2px solid #00ffcc44;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            overflow: hidden;
-        }
-
-        .gallery-thumbnail:hover {
-            border-color: #00ffcc;
-            box-shadow: 0 0 20px rgba(0, 255, 204, 0.3);
-            transform: translateY(-4px);
-        }
-
-        .gallery-thumbnail.current {
-            border-color: #00ff88;
-            box-shadow: 0 0 20px rgba(0, 255, 136, 0.5);
-        }
-
-        .gallery-thumbnail.empty-slot {
-            border-style: dashed;
-            opacity: 0.5;
-        }
-
-        .gallery-thumbnail.empty-slot:hover {
-            opacity: 1;
-        }
-
-        .thumbnail-preview {
-            position: relative;
-            aspect-ratio: 1;
-            background: rgba(0, 0, 0, 0.7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .variation-number {
-            position: absolute;
-            top: 0.5rem;
-            left: 0.5rem;
-            background: rgba(0, 0, 0, 0.8);
-            color: #00ffcc;
-            padding: 0.2rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: bold;
-        }
-
-        .system-badge {
-            position: absolute;
-            top: 0.5rem;
-            right: 0.5rem;
-            font-size: 1.2rem;
-        }
-
-        .empty-indicator {
-            font-size: 3rem;
-            color: #00ffcc44;
-        }
-
-        .thumbnail-info {
-            padding: 0.5rem;
-            background: rgba(0, 0, 0, 0.5);
-        }
-
-        .variation-name {
-            color: #e0e0e0;
-            font-size: 0.85rem;
-            font-weight: bold;
-            margin-bottom: 0.2rem;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .variation-type {
-            color: #888;
-            font-size: 0.75rem;
-        }
-
-        .close-btn {
-            background: none !important;
-            border: none !important;
-            color: #ff6666 !important;
-            font-size: 2rem !important;
-            line-height: 1 !important;
-            padding: 0 0.5rem !important;
-        }
-
-        .close-btn:hover {
-            color: #ff0000 !important;
-        }
-    </style>
+    <title>VIB3+ Engine - 24 Geometries • 6D Rotation</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet" onerror="console.warn('Google Fonts failed to load - using fallback')">
+    
+    <!-- Organized CSS Architecture -->
+    <link rel="stylesheet" href="styles/base.css">
+    <link rel="stylesheet" href="styles/header.css">
+    <link rel="stylesheet" href="styles/controls.css">
+    <link rel="stylesheet" href="styles/reactivity.css">
+    <link rel="stylesheet" href="styles/mobile.css">
+    <link rel="stylesheet" href="styles/animations.css">
 </head>
-<body>
-    <header>
-        <h1>🌟 VIB3+ Engine</h1>
-        <p class="subtitle">Unified Quantum/Faceted/Holographic Visualization • 24 Geometries • 6D Rotation</p>
-    </header>
+<body class="loading">
+    <!-- Top Navigation Bar -->
+    <div class="top-bar">
+        <div class="logo">VIB34D ENGINE</div>
+        
+        <div class="system-selector">
+            <button class="system-btn active" data-system="faceted" onclick="switchSystem('faceted')">
+                🔷 FACETED
+            </button>
+            <button class="system-btn" data-system="quantum" onclick="switchSystem('quantum')">
+                🌌 QUANTUM
+            </button>
+            <button class="system-btn" data-system="holographic" onclick="switchSystem('holographic')">
+                ✨ HOLOGRAPHIC
+            </button>
+            <button class="system-btn" data-system="polychora" onclick="switchSystem('polychora')">
+                🔮 POLYCHORA
+            </button>
+        </div>
+        
+        <div class="action-buttons">
+            <button class="action-btn" onclick="openGallery()" title="Gallery">🖼️</button>
+            <button class="action-btn" onclick="toggleAudio()" title="Audio">🎵</button>
+            <button class="action-btn" onclick="toggleDeviceTilt()" title="Device Tilt (4D Rotation)" id="tiltBtn">📱</button>
+            <button class="action-btn" onclick="showLLMInterface()" title="AI Parameters">🤖</button>
+            <button class="action-btn" onclick="toggleInteractivity()" title="Interactivity Menu (Press I)">I</button>
+        </div>
+    </div>
 
-    <main>
-        <div class="controls">
-            <div class="control-group">
-                <h3>System Selection</h3>
-                <button id="btnQuantum" class="system-btn active" data-system="quantum">🌌 Quantum Engine</button>
-                <button id="btnFaceted" class="system-btn" data-system="faceted">🔷 Faceted System</button>
-                <button id="btnHolographic" class="system-btn" data-system="holographic">🌈 Holographic System</button>
-            </div>
+    <!-- Main Canvas Container -->
+    <div class="canvas-container" id="canvasContainer">
+        <!-- Dynamic Canvas Containers - Canvases created/destroyed per system -->
+        <div class="holographic-layers" id="vib34dLayers" style="display: block;"></div>
+        <div class="holographic-layers" id="quantumLayers" style="display: none;"></div>
+        <div class="holographic-layers" id="holographicLayers" style="display: none;"></div>
+        <div class="holographic-layers" id="polychoraLayers" style="display: none;"></div>
+    </div>
 
-            <div class="control-group">
-                <h3>Geometry (24 Variants)</h3>
-                <select id="geometrySelect">
-                    <!-- Populated by JavaScript -->
-                </select>
-            </div>
+    <!-- Control Panel -->
+    <div class="control-panel" id="controlPanel">
+        <div class="panel-header" id="panelHeader">
+            <span>FACETED SYSTEM</span>
+            <button class="mobile-collapse-btn" onclick="toggleMobilePanel()" style="display: none;">▼</button>
+        </div>
 
-            <div class="control-group">
-                <h3>6D Rotation (All Planes)</h3>
-                <div class="slider-control">
-                    <div class="slider-label">
-                        <span>XY Plane</span>
-                        <span class="slider-value" id="rot4dXYValue">0.0</span>
-                    </div>
-                    <input type="range" id="rot4dXY" min="0" max="6.28" step="0.1" value="0">
-                </div>
-                <div class="slider-control">
-                    <div class="slider-label">
-                        <span>XZ Plane</span>
-                        <span class="slider-value" id="rot4dXZValue">0.0</span>
-                    </div>
-                    <input type="range" id="rot4dXZ" min="0" max="6.28" step="0.1" value="0">
-                </div>
-                <div class="slider-control">
-                    <div class="slider-label">
-                        <span>YZ Plane</span>
-                        <span class="slider-value" id="rot4dYZValue">0.0</span>
-                    </div>
-                    <input type="range" id="rot4dYZ" min="0" max="6.28" step="0.1" value="0">
-                </div>
-                <div class="slider-control">
-                    <div class="slider-label">
-                        <span>XW Plane</span>
-                        <span class="slider-value" id="rot4dXWValue">0.0</span>
-                    </div>
-                    <input type="range" id="rot4dXW" min="0" max="6.28" step="0.1" value="0">
-                </div>
-                <div class="slider-control">
-                    <div class="slider-label">
-                        <span>YW Plane</span>
-                        <span class="slider-value" id="rot4dYWValue">0.0</span>
-                    </div>
-                    <input type="range" id="rot4dYW" min="0" max="6.28" step="0.1" value="0">
-                </div>
-                <div class="slider-control">
-                    <div class="slider-label">
-                        <span>ZW Plane</span>
-                        <span class="slider-value" id="rot4dZWValue">0.0</span>
-                    </div>
-                    <input type="range" id="rot4dZW" min="0" max="6.28" step="0.1" value="0">
-                </div>
-                <button id="randomizeRotation">🎲 Randomize Rotations</button>
-            </div>
-
-            <div class="control-group">
-                <h3>Visual Properties</h3>
-                <div class="slider-control">
-                    <div class="slider-label">
-                        <span>Grid Density</span>
-                        <span class="slider-value" id="gridDensityValue">15</span>
-                    </div>
-                    <input type="range" id="gridDensity" min="4" max="100" step="1" value="15">
-                </div>
-                <div class="slider-control">
-                    <div class="slider-label">
-                        <span>Hue</span>
-                        <span class="slider-value" id="hueValue">200</span>
-                    </div>
-                    <input type="range" id="hue" min="0" max="360" step="1" value="200">
-                </div>
-                <div class="slider-control">
-                    <div class="slider-label">
-                        <span>Speed</span>
-                        <span class="slider-value" id="speedValue">1.0</span>
-                    </div>
-                    <input type="range" id="speed" min="0.1" max="3" step="0.1" value="1.0">
-                </div>
-                <div class="slider-control">
-                    <div class="slider-label">
-                        <span>Morph Factor</span>
-                        <span class="slider-value" id="morphFactorValue">1.0</span>
-                    </div>
-                    <input type="range" id="morphFactor" min="0" max="2" step="0.1" value="1.0">
-                </div>
-                <div class="slider-control">
-                    <div class="slider-label">
-                        <span>Chaos</span>
-                        <span class="slider-value" id="chaosValue">0.2</span>
-                    </div>
-                    <input type="range" id="chaos" min="0" max="1" step="0.05" value="0.2">
-                </div>
-                <div class="slider-control">
-                    <div class="slider-label">
-                        <span>Intensity</span>
-                        <span class="slider-value" id="intensityValue">0.8</span>
-                    </div>
-                    <input type="range" id="intensity" min="0" max="1" step="0.05" value="0.8">
-                </div>
-                <div class="slider-control">
-                    <div class="slider-label">
-                        <span>Saturation</span>
-                        <span class="slider-value" id="saturationValue">0.8</span>
-                    </div>
-                    <input type="range" id="saturation" min="0" max="1" step="0.05" value="0.8">
-                </div>
-                <div class="slider-control">
-                    <div class="slider-label">
-                        <span>Dimension</span>
-                        <span class="slider-value" id="dimensionValue">4.0</span>
-                    </div>
-                    <input type="range" id="dimension" min="3.0" max="4.5" step="0.1" value="4.0">
-                </div>
-            </div>
-
-            <div class="control-group">
-                <h3>Interactivity</h3>
-                <button id="toggleMouse" class="toggle-btn active" data-toggle="mouse">🖱️ Mouse Reactive</button>
-                <button id="toggleTilt" class="toggle-btn active" data-toggle="tilt">📱 Device Tilt</button>
-                <button id="toggleAudio" class="toggle-btn" data-toggle="audio">🎵 Audio Reactive</button>
-                <button id="toggleEnhanced" class="toggle-btn active" data-toggle="enhanced">✨ Enhanced FX</button>
-                <button id="toggleAccentTwin" class="toggle-btn" data-toggle="accentTwin">🌟 Accent Twin</button>
-            </div>
-
-            <div class="control-group">
-                <button id="randomizeAll">🎲 Randomize All</button>
-                <button id="resetAll">🔄 Reset All</button>
-                <button id="openGallery">🖼️ Open Gallery</button>
-                <button id="saveToGallery">💾 Save Current</button>
+        <!-- Geometry Selection -->
+        <div class="control-section" id="geometrySection">
+            <div class="section-title">Geometry</div>
+            <div class="geometry-grid" id="geometryGrid">
+                <!-- Geometry buttons populated by JavaScript -->
             </div>
         </div>
 
-        <div class="canvas-container">
-            <div id="vib3-container"></div>
-            <div class="status ready" id="status">VIB3+ Engine Ready</div>
-            <div class="system-badge" id="systemBadge">🌌 QUANTUM</div>
-        </div>
-    </main>
+        <!-- Parameter Controls -->
+        <div class="control-section">
+            <div class="section-title">6D Rotations (All Planes)</div>
 
+            <!-- 3D Space Rotations -->
+            <div class="control-group">
+                <div class="control-label">
+                    <span>X-Y Rotation (3D)</span>
+                    <span class="control-value" id="rot4dXY-display">0.00</span>
+                </div>
+                <input type="range" id="rot4dXY" class="control-slider" min="-6.28" max="6.28" step="0.01" value="0"
+                       oninput="updateParameter('rot4dXY', this.value)">
+            </div>
+
+            <div class="control-group">
+                <div class="control-label">
+                    <span>X-Z Rotation (3D)</span>
+                    <span class="control-value" id="rot4dXZ-display">0.00</span>
+                </div>
+                <input type="range" id="rot4dXZ" class="control-slider" min="-6.28" max="6.28" step="0.01" value="0"
+                       oninput="updateParameter('rot4dXZ', this.value)">
+            </div>
+
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Y-Z Rotation (3D)</span>
+                    <span class="control-value" id="rot4dYZ-display">0.00</span>
+                </div>
+                <input type="range" id="rot4dYZ" class="control-slider" min="-6.28" max="6.28" step="0.01" value="0"
+                       oninput="updateParameter('rot4dYZ', this.value)">
+            </div>
+
+            <!-- 4D Hyperspace Rotations -->
+            <div class="control-group">
+                <div class="control-label">
+                    <span>X-W Rotation (4D)</span>
+                    <span class="control-value" id="rot4dXW-display">0.00</span>
+                </div>
+                <input type="range" id="rot4dXW" class="control-slider" min="-6.28" max="6.28" step="0.01" value="0"
+                       oninput="updateParameter('rot4dXW', this.value)">
+            </div>
+
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Y-W Rotation (4D)</span>
+                    <span class="control-value" id="rot4dYW-display">0.00</span>
+                </div>
+                <input type="range" id="rot4dYW" class="control-slider" min="-6.28" max="6.28" step="0.01" value="0"
+                       oninput="updateParameter('rot4dYW', this.value)">
+            </div>
+
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Z-W Rotation (4D)</span>
+                    <span class="control-value" id="rot4dZW-display">0.00</span>
+                </div>
+                <input type="range" id="rot4dZW" class="control-slider" min="-6.28" max="6.28" step="0.01" value="0"
+                       oninput="updateParameter('rot4dZW', this.value)">
+            </div>
+        </div>
+
+        <!-- Visual Parameters -->
+        <div class="control-section">
+            <div class="section-title">Visual Parameters</div>
+            
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Grid Density</span>
+                    <span class="control-value" id="gridDensity-display">15</span>
+                </div>
+                <input type="range" id="gridDensity" class="control-slider" min="5" max="100" step="1" value="15"
+                       oninput="updateParameter('gridDensity', this.value)">
+            </div>
+
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Morph Factor</span>
+                    <span class="control-value" id="morphFactor-display">1.00</span>
+                </div>
+                <input type="range" id="morphFactor" class="control-slider" min="0" max="2" step="0.01" value="1"
+                       oninput="updateParameter('morphFactor', this.value)">
+            </div>
+
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Chaos</span>
+                    <span class="control-value" id="chaos-display">0.20</span>
+                </div>
+                <input type="range" id="chaos" class="control-slider" min="0" max="1" step="0.01" value="0.2"
+                       oninput="updateParameter('chaos', this.value)">
+            </div>
+
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Speed</span>
+                    <span class="control-value" id="speed-display">1.00</span>
+                </div>
+                <input type="range" id="speed" class="control-slider" min="0.1" max="3" step="0.01" value="1"
+                       oninput="updateParameter('speed', this.value)">
+            </div>
+        </div>
+
+        <!-- Color Parameters -->
+        <div class="control-section">
+            <div class="section-title">Color Parameters</div>
+            
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Hue</span>
+                    <span class="control-value" id="hue-display">200</span>
+                </div>
+                <input type="range" id="hue" class="control-slider" min="0" max="360" step="1" value="200"
+                       oninput="updateParameter('hue', this.value)">
+            </div>
+
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Intensity</span>
+                    <span class="control-value" id="intensity-display">0.50</span>
+                </div>
+                <input type="range" id="intensity" class="control-slider" min="0" max="1" step="0.01" value="0.5"
+                       oninput="updateParameter('intensity', this.value)">
+            </div>
+
+            <div class="control-group">
+                <div class="control-label">
+                    <span>Saturation</span>
+                    <span class="control-value" id="saturation-display">0.80</span>
+                </div>
+                <input type="range" id="saturation" class="control-slider" min="0" max="1" step="0.01" value="0.8"
+                       oninput="updateParameter('saturation', this.value)">
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="control-section">
+            <button class="panel-btn" onclick="randomizeAll()">🎲 Randomize Parameters</button>
+            <button class="panel-btn" onclick="randomizeEverything()">🎯 Full Random</button>
+            <button class="panel-btn" onclick="resetAll()">🔄 Reset All</button>
+            <button class="panel-btn" onclick="saveToGallery()">💾 Save to Gallery</button>
+            <button class="panel-btn" onclick="createTradingCard()">🎴 Trading Card</button>
+        </div>
+    </div>
+
+    <!-- URL Parameter Handler (runs first) -->
+    <script type="module" src="js/core/url-params.js"></script>
+
+    <!-- Gallery Preview Fix (runs early for gallery previews) -->
+    <script type="module" src="js/core/gallery-preview-fix.js"></script>
+
+    <!-- Core JavaScript Modules (NEW CLEAN ARCHITECTURE) - Order matters for globals -->
+    <script type="module" src="js/audio/audio-engine.js"></script>
+    <script type="module" src="js/controls/ui-handlers.js"></script>
+    <script type="module" src="js/gallery/gallery-manager.js"></script>
+    <script type="module" src="js/interactions/device-tilt.js"></script>
+    
+    <!-- Initialize globals and user parameter state BEFORE main app -->
+    <script>
+        // Initialize global state that modules need
+        window.userParameterState = {};
+        // CRITICAL FIX: Don't overwrite currentSystem if URL parameters already set it
+        if (!window.currentSystem) {
+            window.currentSystem = 'faceted';
+            console.log('🔧 Global: Set currentSystem to default faceted');
+        } else {
+            console.log(`🔧 Global: Preserving existing currentSystem = '${window.currentSystem}'`);
+        }
+        window.moduleReady = false;
+        
+        // Initialize geometries data - 24 GEOMETRIES PER SYSTEM
+        window.geometries = {
+            faceted: [
+                // Base geometries (0-7)
+                'Tetrahedron', 'Hypercube', 'Sphere', 'Torus', 'Klein Bottle', 'Fractal', 'Wave', 'Crystal',
+                // Hypersphere Core (8-15)
+                '🌀 Tetrahedron Core', '🌀 Hypercube Core', '🌀 Sphere Core', '🌀 Torus Core',
+                '🌀 Klein Core', '🌀 Fractal Core', '🌀 Wave Core', '🌀 Crystal Core',
+                // Hypertetrahedron Core (16-23)
+                '🔺 Tetrahedron Core', '🔺 Hypercube Core', '🔺 Sphere Core', '🔺 Torus Core',
+                '🔺 Klein Core', '🔺 Fractal Core', '🔺 Wave Core', '🔺 Crystal Core'
+            ],
+            quantum: [
+                // Base geometries (0-7)
+                'Tetrahedron', 'Hypercube', 'Sphere', 'Torus', 'Klein Bottle', 'Fractal', 'Wave', 'Crystal',
+                // Hypersphere Core (8-15)
+                '🌀 Tetrahedron Core', '🌀 Hypercube Core', '🌀 Sphere Core', '🌀 Torus Core',
+                '🌀 Klein Core', '🌀 Fractal Core', '🌀 Wave Core', '🌀 Crystal Core',
+                // Hypertetrahedron Core (16-23)
+                '🔺 Tetrahedron Core', '🔺 Hypercube Core', '🔺 Sphere Core', '🔺 Torus Core',
+                '🔺 Klein Core', '🔺 Fractal Core', '🔺 Wave Core', '🔺 Crystal Core'
+            ],
+            holographic: ['HOLOGRAPHIC'], // Single holographic mode
+            polychora: ['5-CELL', 'TESSERACT', '16-CELL', '24-CELL', '600-CELL', '120-CELL']
+        };
+        
+        console.log('🔧 Global state initialized for clean architecture');
+    </script>
+
+    <!-- Main Application Module -->
     <script type="module">
-        import { VIB3Engine } from './src/core/VIB3Engine.js';
-        import { GallerySystem } from './src/gallery/GallerySystem.js';
-        import { CollectionManager } from './src/gallery/CollectionManager.js';
-
-        // Initialize engine
-        const engine = new VIB3Engine();
-        await engine.initialize('vib3-container');
-
-        // Initialize Gallery system
-        const gallery = new GallerySystem(engine);
-        const collectionManager = new CollectionManager();
-
-        // Auto-discover and load collections
-        await collectionManager.autoDiscoverCollections().catch(err => {
-            console.log('No collections folder found - using built-in variations only');
-        });
-
-        // Populate geometry dropdown
-        const geometrySelect = document.getElementById('geometrySelect');
-        engine.getGeometryNames().forEach((name, index) => {
-            const option = document.createElement('option');
-            option.value = index;
-            option.textContent = `${index}: ${name}`;
-            geometrySelect.appendChild(option);
-        });
-
-        // System switching - WITH PROPER STATUS MESSAGES
-        document.querySelectorAll('.system-btn').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                const system = btn.dataset.system;
-
-                // Show loading status
-                const statusEl = document.getElementById('status');
-                statusEl.textContent = `Loading ${system} system...`;
-                statusEl.className = 'status';
-
-                console.log(`🔄 Switching to ${system} system...`);
-
+        (async function() {
+            try {
+                console.log('📦 Starting system imports...');
+                
+                // Import the main app first
+                const VIB34DApp = (await import('./js/core/app.js')).default;
+                console.log('✅ VIB34DApp imported');
+                
+                // Try to import system engines - make them optional for clean architecture demo
+                let VIB34DIntegratedEngine, QuantumEngine, RealHolographicSystem, PolychoraSystem;
+                let CollectionManager, UnifiedSaveManager, ParameterMapper, CanvasManager, TradingCardGenerator, ReactivityManager;
+                
                 try {
-                    const success = await engine.switchSystem(system);
-
-                    if (success) {
-                        // Update UI
-                        document.querySelectorAll('.system-btn').forEach(b => b.classList.remove('active'));
-                        btn.classList.add('active');
-
-                        const badges = {
-                            quantum: '🌌 QUANTUM',
-                            faceted: '🔷 FACETED',
-                            holographic: '🌈 HOLOGRAPHIC'
-                        };
-                        document.getElementById('systemBadge').textContent = badges[system];
-
-                        statusEl.textContent = `${badges[system]} Active`;
-                        statusEl.className = 'status ready';
-                        console.log(`✅ ${system} system loaded successfully`);
-                    } else {
-                        statusEl.textContent = `❌ Failed to load ${system}`;
-                        statusEl.className = 'status';
-                        console.error(`❌ Failed to switch to ${system} system`);
-                    }
-                } catch (error) {
-                    statusEl.textContent = `❌ Error loading ${system}`;
-                    statusEl.className = 'status';
-                    console.error(`❌ Error switching to ${system}:`, error);
+                    const coreEngine = await import('./src/core/Engine.js');
+                    VIB34DIntegratedEngine = coreEngine.VIB34DIntegratedEngine;
+                    console.log('✅ VIB34DIntegratedEngine imported');
+                } catch (e) {
+                    console.warn('⚠️ VIB34DIntegratedEngine not available:', e.message);
                 }
-            });
-        });
-
-        // Parameter controls
-        const sliders = {
-            rot4dXY: document.getElementById('rot4dXY'),
-            rot4dXZ: document.getElementById('rot4dXZ'),
-            rot4dYZ: document.getElementById('rot4dYZ'),
-            rot4dXW: document.getElementById('rot4dXW'),
-            rot4dYW: document.getElementById('rot4dYW'),
-            rot4dZW: document.getElementById('rot4dZW'),
-            gridDensity: document.getElementById('gridDensity'),
-            hue: document.getElementById('hue'),
-            speed: document.getElementById('speed'),
-            morphFactor: document.getElementById('morphFactor'),
-            chaos: document.getElementById('chaos'),
-            intensity: document.getElementById('intensity'),
-            saturation: document.getElementById('saturation'),
-            dimension: document.getElementById('dimension')
-        };
-
-        // Interactivity state
-        const interactivityState = {
-            mouse: true,
-            tilt: true,
-            audio: false,
-            enhanced: true,
-            accentTwin: false
-        };
-
-        Object.entries(sliders).forEach(([param, slider]) => {
-            const valueDisplay = document.getElementById(`${param}Value`);
-            slider.addEventListener('input', () => {
-                valueDisplay.textContent = slider.value;
-                engine.setParameter(param, parseFloat(slider.value));
-            });
-        });
-
-        geometrySelect.addEventListener('change', () => {
-            engine.setParameter('geometry', parseInt(geometrySelect.value));
-        });
-
-        // Randomize buttons
-        document.getElementById('randomizeRotation').addEventListener('click', () => {
-            Object.entries(sliders).forEach(([param, slider]) => {
-                if (param.startsWith('rot4d')) {
-                    const value = (Math.random() * 6.28).toFixed(1);
-                    slider.value = value;
-                    document.getElementById(`${param}Value`).textContent = value;
-                    engine.setParameter(param, parseFloat(value));
+                
+                try {
+                    const quantumEngine = await import('./src/quantum/QuantumEngine.js');
+                    QuantumEngine = quantumEngine.QuantumEngine;
+                    console.log('✅ QuantumEngine imported');
+                } catch (e) {
+                    console.warn('⚠️ QuantumEngine not available:', e.message);
                 }
-            });
-        });
-
-        document.getElementById('randomizeAll').addEventListener('click', () => {
-            engine.randomizeAll();
-            // Update UI to reflect new values
-            const params = engine.getAllParameters();
-            Object.entries(sliders).forEach(([param, slider]) => {
-                if (params[param] !== undefined) {
-                    slider.value = params[param];
-                    document.getElementById(`${param}Value`).textContent = params[param].toFixed(1);
+                
+                try {
+                    const holoSystem = await import('./src/holograms/RealHolographicSystem.js');
+                    RealHolographicSystem = holoSystem.RealHolographicSystem;
+                    console.log('✅ RealHolographicSystem imported');
+                } catch (e) {
+                    console.warn('⚠️ RealHolographicSystem not available:', e.message);
                 }
-            });
-            geometrySelect.value = params.geometry;
-        });
-
-        document.getElementById('resetAll').addEventListener('click', () => {
-            engine.resetAll();
-            // Update UI
-            const params = engine.getAllParameters();
-            Object.entries(sliders).forEach(([param, slider]) => {
-                if (params[param] !== undefined) {
-                    slider.value = params[param];
-                    document.getElementById(`${param}Value`).textContent = params[param].toFixed(1);
-                }
-            });
-            geometrySelect.value = params.geometry;
-        });
-
-        // Gallery buttons
-        document.getElementById('openGallery').addEventListener('click', () => {
-            gallery.openGallery();
-        });
-
-        document.getElementById('saveToGallery').addEventListener('click', () => {
-            // Find next available custom slot
-            let nextSlot = 30;
-            while (nextSlot < 100 && gallery.savedVariations.has(nextSlot)) {
-                nextSlot++;
-            }
-            if (nextSlot < 100) {
-                gallery.saveCurrentToSlot(nextSlot);
-                document.getElementById('status').textContent = `Saved to slot ${nextSlot}`;
-                setTimeout(() => {
-                    document.getElementById('status').textContent = 'VIB3+ Engine Ready';
-                }, 2000);
-            } else {
-                document.getElementById('status').textContent = 'Gallery full!';
-            }
-        });
-
-        // Interactivity toggle buttons - ACTUALLY FUNCTIONAL
-        document.querySelectorAll('.toggle-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const toggle = btn.dataset.toggle;
-                interactivityState[toggle] = !interactivityState[toggle];
-                btn.classList.toggle('active', interactivityState[toggle]);
-
-                console.log(`🔄 Toggle ${toggle}:`, interactivityState[toggle] ? 'ON' : 'OFF');
-
-                // AUDIO TOGGLE
-                if (toggle === 'audio') {
-                    const systemInstance = engine.getActiveSystemInstance();
-                    if (interactivityState.audio) {
-                        // Enable audio
-                        if (systemInstance.enableAudio) {
-                            systemInstance.enableAudio();
-                            console.log('🎵 Audio reactivity ENABLED');
-                        } else if (systemInstance.initAudio) {
-                            systemInstance.initAudio();
-                            console.log('🎵 Audio reactivity ENABLED');
-                        }
-                        window.audioEnabled = true;
-                    } else {
-                        // Disable audio
-                        if (systemInstance.disableAudio) {
-                            systemInstance.disableAudio();
-                        } else if (systemInstance.toggleAudio) {
-                            systemInstance.toggleAudio(false);
-                        }
-                        window.audioEnabled = false;
-                        console.log('🔇 Audio reactivity DISABLED');
-                    }
-                }
-
-                // TILT TOGGLE
-                if (toggle === 'tilt') {
-                    if (interactivityState.tilt) {
-                        console.log('📱 Device tilt ENABLED');
-                    } else {
-                        console.log('📱 Device tilt DISABLED');
-                    }
-                }
-
-                // MOUSE TOGGLE
-                if (toggle === 'mouse') {
-                    if (interactivityState.mouse) {
-                        console.log('🖱️ Mouse reactivity ENABLED');
-                    } else {
-                        console.log('🖱️ Mouse reactivity DISABLED');
-                    }
-                }
-
-                // ENHANCED FX TOGGLE
-                if (toggle === 'enhanced') {
-                    if (interactivityState.enhanced) {
-                        console.log('✨ Enhanced FX ENABLED');
-                    } else {
-                        console.log('✨ Enhanced FX DISABLED');
-                    }
-                }
-
-                // ACCENT TWIN TOGGLE
-                if (toggle === 'accentTwin') {
-                    if (interactivityState.accentTwin) {
-                        console.log('🌟 Accent Twin ENABLED');
-                    } else {
-                        console.log('🌟 Accent Twin DISABLED');
-                    }
-                }
-            });
-        });
-
-        // Device Orientation API for tilt → 6D rotation mapping
-        let deviceOrientationEnabled = false;
-        const baseRotations = {
-            rot4dXW: 0,
-            rot4dYW: 0,
-            rot4dZW: 0
-        };
-
-        function handleDeviceOrientation(event) {
-            if (!interactivityState.tilt) return;
-
-            const alpha = event.alpha || 0;  // Z-axis (compass direction)
-            const beta = event.beta || 0;    // X-axis (front-back tilt)
-            const gamma = event.gamma || 0;  // Y-axis (left-right tilt)
-
-            // Normalize values
-            const betaNorm = (beta - 90) / 90;   // -1 to 1
-            const gammaNorm = gamma / 90;         // -1 to 1
-            const alphaNorm = alpha / 180;        // 0 to 2
-
-            // Detect extreme tilt
-            const tiltIntensity = Math.sqrt(betaNorm * betaNorm + gammaNorm * gammaNorm);
-            const extremeTilt = tiltIntensity > 0.7;
-
-            // Dramatic 4D rotation scaling
-            const dramatic4DScale = extremeTilt ? 0.8 : 0.5;
-
-            // Map device orientation to 6D rotations (4D hyperspace planes)
-            const tiltRotations = {
-                rot4dXW: baseRotations.rot4dXW + (betaNorm * Math.PI / 180 * dramatic4DScale),
-                rot4dYW: baseRotations.rot4dYW + (gammaNorm * Math.PI / 180 * dramatic4DScale),
-                rot4dZW: baseRotations.rot4dZW + (alphaNorm * Math.PI / 180 * dramatic4DScale * 0.5)
-            };
-
-            // Apply tilt rotations to engine
-            Object.entries(tiltRotations).forEach(([param, value]) => {
-                engine.setParameter(param, value);
-                // Update UI sliders
-                const slider = sliders[param];
-                if (slider) {
-                    slider.value = value.toFixed(2);
-                    document.getElementById(`${param}Value`).textContent = value.toFixed(2);
-                }
-            });
-
-            // Update visual intensity based on tilt
-            if (extremeTilt && interactivityState.enhanced) {
-                const params = engine.getAllParameters();
-                engine.setParameter('intensity', Math.min(1, (params.intensity || 0.8) + tiltIntensity * 0.25));
-                engine.setParameter('chaos', Math.min(1, (params.chaos || 0.2) + Math.pow(tiltIntensity, 2) * 0.15));
-            }
-        }
-
-        // Request device orientation permission (iOS 13+)
-        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-            document.getElementById('toggleTilt').addEventListener('click', async () => {
-                if (!deviceOrientationEnabled && interactivityState.tilt) {
+                
+                try {
+                    const newPolySystem = await import('./src/core/PolychoraSystemNew.js');
+                    NewPolychoraEngine = newPolySystem.NewPolychoraEngine;
+                    console.log('✅ NEW 4D Polychora Engine imported with VIB34D DNA');
+                } catch (e) {
+                    console.warn('⚠️ New Polychora Engine not available:', e.message);
+                    // Fallback to old system if new one fails
                     try {
-                        const permission = await DeviceOrientationEvent.requestPermission();
-                        if (permission === 'granted') {
-                            window.addEventListener('deviceorientation', handleDeviceOrientation);
-                            deviceOrientationEnabled = true;
-                            console.log('✅ Device orientation enabled');
-                        }
-                    } catch (error) {
-                        console.error('Device orientation permission denied:', error);
+                        const polySystem = await import('./src/core/PolychoraSystem.js');
+                        NewPolychoraEngine = polySystem.PolychoraSystem;
+                        console.log('✅ Fallback to old PolychoraSystem');
+                    } catch (e2) {
+                        console.warn('⚠️ No Polychora system available:', e2.message);
                     }
                 }
-            });
-        } else if (window.DeviceOrientationEvent) {
-            // Auto-enable for non-iOS devices
-            window.addEventListener('deviceorientation', handleDeviceOrientation);
-            deviceOrientationEnabled = true;
-            console.log('✅ Device orientation auto-enabled');
-        }
+                
+                // Import other components with fallbacks
+                try {
+                    const canvasManager = await import('./src/core/CanvasManager.js');
+                    CanvasManager = canvasManager.CanvasManager;
+                } catch (e) {
+                    console.warn('⚠️ CanvasManager not available - using stub');
+                }
+                
+                try {
+                    const unifiedReactivityManager = await import('./src/core/UnifiedReactivityManager.js');
+                    UnifiedReactivityManager = unifiedReactivityManager.UnifiedReactivityManager;
+                    console.log('✅ UnifiedReactivityManager imported');
+                } catch (e) {
+                    console.warn('⚠️ UnifiedReactivityManager not available');
+                }
+                
+                try {
+                    const reactivityManager = await import('./src/core/ReactivityManager.js');
+                    ReactivityManager = reactivityManager.ReactivityManager;
+                } catch (e) {
+                    console.warn('⚠️ ReactivityManager not available - using stub');
+                }
 
-        console.log('%c🌟 VIB3+ Engine Ready', 'color: #00ffcc; font-size: 20px; font-weight: bold;');
-        console.log('3 Systems: Quantum, Faceted, Holographic');
-        console.log('24 Geometries per system');
-        console.log('Full 6D Rotation (XY, XZ, YZ, XW, YW, ZW)');
+                // Store engine classes globally for system switching
+                window.engineClasses = {
+                    VIB34DIntegratedEngine,
+                    QuantumEngine,
+                    RealHolographicSystem,
+                    NewPolychoraEngine
+                };
+                
+                console.log('📦 Engine classes stored:', Object.keys(window.engineClasses).filter(k => window.engineClasses[k]));
+
+                // Initialize Unified Reactivity Manager FIRST
+                if (UnifiedReactivityManager) {
+                    const reactivityManager = new UnifiedReactivityManager();
+                    console.log('✅ UnifiedReactivityManager initialized');
+                } else {
+                    // Fallback getCurrentReactivityState function
+                    window.getCurrentReactivityState = function() {
+                        return {
+                            system: window.currentSystem || 'faceted',
+                            mouse: { faceted: true, quantum: false, holographic: false, polychora: false, mixed: false },
+                            click: { faceted: true, quantum: false, holographic: false, polychora: false, mixed: false },
+                            scroll: { faceted: true, quantum: false, holographic: false, polychora: false, mixed: false },
+                            audio: window.audioEnabled || false,
+                            interactivity: window.interactivityEnabled !== false,
+                            deviceTilt: window.deviceTiltHandler?.isEnabled || false
+                        };
+                    };
+                    console.log('⚠️ Using fallback getCurrentReactivityState');
+                }
+
+                // Initialize VIB34D Application
+                const app = new VIB34DApp();
+                window.vib34dApp = app;
+                
+                // CRITICAL FIX: Ensure global functions are available IMMEDIATELY for gallery previews
+                await app.initialize();
+                
+                // Force check that essential functions are global
+                if (!window.syncVisualizerToUI) {
+                    console.error('🚨 CRITICAL: syncVisualizerToUI not available globally after app init');
+                } else {
+                    console.log('✅ Essential functions available globally');
+                }
+
+                // Initialize default system
+                const initialSystem = window.currentSystem || 'faceted';
+                if (window.switchSystem) {
+                    await window.switchSystem(initialSystem);
+                }
+                
+                if (window.setupGeometry) {
+                    window.setupGeometry(initialSystem);
+                }
+
+                window.moduleReady = true;
+                document.body.classList.remove('loading');
+
+                console.log('🚀 VIB34D Clean Architecture System Loaded');
+                
+                // TESTING MODE: Run architecture tests if requested
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.has('testing-mode')) {
+                    console.log('🧪 TESTING MODE: Running architecture validation...');
+                    
+                    // Add test results overlay
+                    const testOverlay = document.createElement('div');
+                    testOverlay.id = 'test-overlay';
+                    testOverlay.style.cssText = `
+                        position: fixed;
+                        top: 60px;
+                        left: 20px;
+                        width: 400px;
+                        max-height: 80vh;
+                        overflow-y: auto;
+                        background: rgba(0, 0, 0, 0.95);
+                        border: 2px solid #00ffff;
+                        border-radius: 10px;
+                        padding: 15px;
+                        font-family: 'Orbitron', monospace;
+                        font-size: 0.8rem;
+                        color: #fff;
+                        z-index: 9999;
+                    `;
+                    testOverlay.innerHTML = `
+                        <h3 style="color: #00ffff; margin-bottom: 10px;">🧪 ARCHITECTURE TEST</h3>
+                        <div id="test-results"></div>
+                    `;
+                    document.body.appendChild(testOverlay);
+                    
+                    // Run tests  
+                    setTimeout(runArchitectureTests, 1000);
+                    
+                    function runArchitectureTests() {
+                    const results = document.getElementById('test-results');
+                    let passedTests = 0;
+                    let totalTests = 0;
+                    
+                    function logTest(message, passed) {
+                        totalTests++;
+                        if (passed) passedTests++;
+                        
+                        const div = document.createElement('div');
+                        div.style.cssText = `color: ${passed ? '#00ff00' : '#ff4444'}; margin: 2px 0;`;
+                        div.innerHTML = `${passed ? '✅' : '❌'} ${message}`;
+                        results.appendChild(div);
+                    }
+                    
+                    // Test essential functions
+                    logTest('window.switchSystem available', typeof window.switchSystem === 'function');
+                    logTest('window.selectGeometry available', typeof window.selectGeometry === 'function');
+                    logTest('window.updateParameter available', typeof window.updateParameter === 'function');
+                    logTest('window.randomizeAll available', typeof window.randomizeAll === 'function');
+                    logTest('window.resetAll available', typeof window.resetAll === 'function');
+                    
+                    // Test DOM elements
+                    logTest('Canvas Container exists', !!document.getElementById('canvasContainer'));
+                    logTest('Control Panel exists', !!document.getElementById('controlPanel'));
+                    logTest('Panel Header exists', !!document.getElementById('panelHeader'));
+                    logTest('Faceted Layers exist', !!document.getElementById('vib34dLayers'));
+                    
+                    // Test parameter controls
+                    const params = ['rot4dXW', 'rot4dYW', 'rot4dZW', 'gridDensity', 'morphFactor', 'chaos', 'speed', 'hue', 'intensity', 'saturation'];
+                    params.forEach(param => {
+                        const slider = document.getElementById(param);
+                        logTest(`${param} slider exists`, !!slider);
+                    });
+                    
+                    // Test system buttons
+                    const systems = ['faceted', 'quantum', 'holographic', 'polychora'];
+                    systems.forEach(system => {
+                        const btn = document.querySelector(`[data-system="${system}"]`);
+                        logTest(`${system} button exists`, !!btn);
+                    });
+                    
+                    // Final results
+                    const passRate = ((passedTests / totalTests) * 100).toFixed(1);
+                    const finalDiv = document.createElement('div');
+                    finalDiv.style.cssText = `
+                        color: ${passRate >= 90 ? '#00ff00' : passRate >= 70 ? '#ffff00' : '#ff4444'};
+                        font-weight: bold;
+                        margin-top: 10px;
+                        padding: 10px;
+                        border-top: 1px solid #333;
+                    `;
+                    finalDiv.innerHTML = `
+                        <div>📊 RESULT: ${passedTests}/${totalTests} (${passRate}%)</div>
+                        <div>${passRate >= 90 ? '✅ ARCHITECTURE READY' : passRate >= 70 ? '⚠️ NEEDS FIXES' : '❌ CRITICAL ISSUES'}</div>
+                    `;
+                    results.appendChild(finalDiv);
+                    
+                    console.log(`🧪 Architecture test complete: ${passedTests}/${totalTests} passed (${passRate}%)`);
+                    }
+                }
+                
+            } catch (error) {
+                console.error('❌ Failed to initialize VIB34D system:', error);
+                document.body.classList.remove('loading');
+                
+                // Show error overlay
+                const errorDiv = document.createElement('div');
+                errorDiv.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: rgba(255, 0, 0, 0.9);
+                    color: white;
+                    padding: 20px;
+                    border-radius: 10px;
+                    font-family: 'Orbitron', monospace;
+                    z-index: 10000;
+                    max-width: 80vw;
+                `;
+                errorDiv.innerHTML = `
+                    <h3>❌ VIB34D Initialization Failed</h3>
+                    <p>${error.message}</p>
+                    <small>Check console for details</small>
+                `;
+                document.body.appendChild(errorDiv);
+            }
+        })();
     </script>
 </body>
 </html>
