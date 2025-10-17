@@ -464,88 +464,18 @@ export class RealHolographicSystem {
     }
     
     setupCenterDistanceReactivity() {
+        // AUDIO ONLY - No mouse/touch/scroll interference
+        // Holographic system is purely audio-reactive now
+        console.log('✨ Holographic system: AUDIO-ONLY mode (no mouse/touch reactivity)');
+
+        // If ReactivityManager is active, it handles all interactivity
         if (!this.useBuiltInReactivity) {
             console.log('✨ Holographic built-in reactivity DISABLED - ReactivityManager active');
             return;
         }
-        
-        console.log('✨ Setting up holographic shimmer effects + dramatic color bursts for Holographic system');
-        
-        // Track mouse/touch position for shimmer calculation
-        this.currentX = 0.5;
-        this.currentY = 0.5;
-        
-        // Holographic color burst state (dramatic multi-parameter effects)
-        this.colorBurstIntensity = 0;
-        this.burstHueShift = 0;
-        this.burstIntensityBoost = 0;
-        this.burstSaturationSpike = 0;
-        this.burstChaosEffect = 0;
-        this.burstSpeedBoost = 0;
-        
-        const holographicCanvases = [
-            'holo-background-canvas', 'holo-shadow-canvas', 'holo-content-canvas',
-            'holo-highlight-canvas', 'holo-accent-canvas'
-        ];
-        
-        holographicCanvases.forEach(canvasId => {
-            const canvas = document.getElementById(canvasId);
-            if (!canvas) return;
-            
-            // Mouse movement -> holographic shimmer (like trading card iridescence)
-            canvas.addEventListener('mousemove', (e) => {
-                if (!this.isActive) return;
-                
-                const rect = canvas.getBoundingClientRect();
-                const mouseX = (e.clientX - rect.left) / rect.width;
-                const mouseY = (e.clientY - rect.top) / rect.height;
-                
-                this.updateHolographicShimmer(mouseX, mouseY);
-            });
-            
-            // Touch movement -> holographic shimmer
-            canvas.addEventListener('touchmove', (e) => {
-                if (!this.isActive) return;
-                e.preventDefault();
-                
-                if (e.touches.length > 0) {
-                    const touch = e.touches[0];
-                    const rect = canvas.getBoundingClientRect();
-                    const touchX = (touch.clientX - rect.left) / rect.width;
-                    const touchY = (touch.clientY - rect.top) / rect.height;
-                    
-                    this.updateHolographicShimmer(touchX, touchY);
-                }
-            }, { passive: false });
-            
-            // Click -> dramatic color burst (like Quantum's dramatic effects)
-            canvas.addEventListener('click', (e) => {
-                if (!this.isActive) return;
-                
-                const rect = canvas.getBoundingClientRect();
-                const clickX = (e.clientX - rect.left) / rect.width;
-                const clickY = (e.clientY - rect.top) / rect.height;
-                
-                this.triggerHolographicColorBurst(clickX, clickY);
-            });
-            
-            // Touch end -> dramatic color burst
-            canvas.addEventListener('touchend', (e) => {
-                if (!this.isActive) return;
-                
-                if (e.changedTouches.length > 0) {
-                    const touch = e.changedTouches[0];
-                    const rect = canvas.getBoundingClientRect();
-                    const touchX = (touch.clientX - rect.left) / rect.width;
-                    const touchY = (touch.clientY - rect.top) / rect.height;
-                    
-                    this.triggerHolographicColorBurst(touchX, touchY);
-                }
-            });
-        });
-        
-        // Start holographic color burst animation loop
-        this.startHolographicColorBurstLoop();
+
+        // NO EVENT LISTENERS - Audio reactivity only
+        console.log('🎵 Holographic system will respond to audio input only');
     }
     
     updateHolographicShimmer(x, y) {
