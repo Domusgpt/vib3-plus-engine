@@ -17,10 +17,12 @@ body {
 /* Canvas container - main visualization area */
 .canvas-container {
     position: fixed;
-    top: 50px;
+    top: 60px;
     left: 0;
-    right: 300px;
-    bottom: 0;
+    right: 0;
+    bottom: 52px;
+    background: #000;
+    transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .visualization-canvas {
