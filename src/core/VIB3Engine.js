@@ -5,22 +5,18 @@
  */
 
 import { ParameterManager } from './Parameters.js';
+import { CanvasManager } from './CanvasManager.js';
 import { QuantumEngine } from '../quantum/QuantumEngine.js';
 import { FacetedSystem } from '../faceted/FacetedSystem.js';
 import { RealHolographicSystem } from '../holograms/RealHolographicSystem.js';
 
 export class VIB3Engine {
     constructor() {
-        this.systems = {
-            quantum: null,
-            faceted: null,
-            holographic: null
-        };
-
-        this.currentSystem = 'quantum';
+        this.activeSystem = null; // Only one system active at a time
+        this.currentSystemName = 'quantum';
         this.parameters = new ParameterManager();
         this.initialized = false;
-        this.canvasContainer = null;
+        this.canvasManager = null;
     }
 
     /**
@@ -29,17 +25,16 @@ export class VIB3Engine {
     async initialize(containerId = 'vib3-container') {
         console.log('🌟 Initializing VIB3+ Engine');
 
-        this.canvasContainer = document.getElementById(containerId);
-        if (!this.canvasContainer) {
-            console.error('❌ Container not found:', containerId);
+        // Create CanvasManager
+        try {
+            this.canvasManager = new CanvasManager(containerId);
+        } catch (error) {
+            console.error('❌ CanvasManager initialization failed:', error);
             return false;
         }
 
-        // Create canvas structure
-        this.setupCanvasStructure();
-
-        // Initialize all 3 systems
-        await this.initializeSystems();
+        // Initialize starting system
+        await this.switchSystem(this.currentSystemName);
 
         this.initialized = true;
         console.log('✅ VIB3+ Engine initialized');
@@ -47,151 +42,123 @@ export class VIB3Engine {
     }
 
     /**
-     * Setup canvas structure for all 3 systems
+     * Get layer configuration for each system type
      */
-    setupCanvasStructure() {
-        this.canvasContainer.innerHTML = '';
-
-        // Quantum container (multi-layer)
-        const quantumContainer = this.createSystemContainer('quantum', [
-            'background', 'shadow', 'content', 'highlight', 'accent'
-        ]);
-        this.canvasContainer.appendChild(quantumContainer);
-
-        // Faceted container (single canvas)
-        const facetedContainer = this.createSystemContainer('faceted', ['canvas']);
-        this.canvasContainer.appendChild(facetedContainer);
-
-        // Holographic container (multi-layer)
-        const holographicContainer = this.createSystemContainer('holographic', [
-            'background', 'shadow', 'content', 'highlight', 'accent'
-        ]);
-        this.canvasContainer.appendChild(holographicContainer);
-
-        console.log('✅ Canvas structure created');
+    getSystemLayers(systemName) {
+        const layerConfigs = {
+            quantum: ['background', 'shadow', 'content', 'highlight', 'accent'],
+            faceted: ['canvas'],
+            holographic: ['background', 'shadow', 'content', 'highlight', 'accent']
+        };
+        return layerConfigs[systemName] || ['canvas'];
     }
 
     /**
-     * Create container for a system
+     * Create and initialize a specific system
      */
-    createSystemContainer(systemName, layers) {
-        const container = document.createElement('div');
-        container.id = `${systemName}Layers`;
-        container.style.cssText = `
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: ${systemName === this.currentSystem ? 'block' : 'none'};
-        `;
+    async createSystem(systemName) {
+        console.log(`🔧 Creating ${systemName} system...`);
 
-        const rect = this.canvasContainer.getBoundingClientRect();
-        const width = rect.width || 800;
-        const height = rect.height || 600;
+        // Get layers for this system
+        const layers = this.getSystemLayers(systemName);
 
-        layers.forEach(layer => {
-            const canvas = document.createElement('canvas');
-            canvas.id = `${systemName}-${layer}-canvas`;
-            canvas.width = width;
-            canvas.height = height;
-            canvas.style.cssText = `
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                pointer-events: none;
-            `;
-            container.appendChild(canvas);
-        });
+        // Create canvases using CanvasManager
+        const canvases = this.canvasManager.createSystemCanvases(systemName, layers);
 
-        return container;
-    }
-
-    /**
-     * Initialize all visualization systems
-     */
-    async initializeSystems() {
-        console.log('🔧 Initializing visualization systems...');
-
-        // Initialize Quantum Engine
+        // Create system instance based on type
+        let system = null;
         try {
-            this.systems.quantum = new QuantumEngine();
-            this.systems.quantum.setActive(false);
-            console.log('✅ Quantum Engine ready');
-        } catch (error) {
-            console.error('❌ Quantum Engine initialization failed:', error);
-        }
+            switch (systemName) {
+                case 'quantum':
+                    system = new QuantumEngine();
+                    await system.initialize(canvases);
+                    break;
 
-        // Initialize Faceted System
-        try {
-            this.systems.faceted = new FacetedSystem();
-            this.systems.faceted.initialize();
-            this.systems.faceted.setActive(false);
-            console.log('✅ Faceted System ready');
-        } catch (error) {
-            console.error('❌ Faceted System initialization failed:', error);
-        }
+                case 'faceted':
+                    system = new FacetedSystem();
+                    await system.initialize(canvases);
+                    break;
 
-        // Initialize Holographic System
-        try {
-            this.systems.holographic = new RealHolographicSystem();
-            this.systems.holographic.initialize();
-            this.systems.holographic.setActive(false);
-            console.log('✅ Holographic System ready');
-        } catch (error) {
-            console.error('❌ Holographic System initialization failed:', error);
-        }
+                case 'holographic':
+                    system = new RealHolographicSystem();
+                    await system.initialize(canvases);
+                    break;
 
-        // Activate default system
-        await this.switchSystem(this.currentSystem);
+                default:
+                    throw new Error(`Unknown system: ${systemName}`);
+            }
+
+            // Register WebGL contexts with CanvasManager
+            canvases.forEach((canvas, layerName) => {
+                const gl = canvas.getContext('webgl') || canvas.getContext('webgl2');
+                if (gl) {
+                    this.canvasManager.registerContext(layerName, gl);
+                }
+            });
+
+            // Apply current parameters
+            system.updateParameters(this.parameters.getAllParameters());
+            system.setActive(true);
+
+            console.log(`✅ ${systemName} system created and activated`);
+            return system;
+
+        } catch (error) {
+            console.error(`❌ ${systemName} system creation failed:`, error);
+            throw error;
+        }
     }
 
     /**
      * Switch between visualization systems
+     * DESTROYS old system and CREATES new system (proper WebGL cleanup)
      */
     async switchSystem(systemName) {
-        if (!this.systems[systemName]) {
+        if (!['quantum', 'faceted', 'holographic'].includes(systemName)) {
             console.error('❌ Unknown system:', systemName);
             return false;
         }
 
-        console.log(`🔄 Switching to ${systemName} system`);
+        console.log(`🔄 Switching from ${this.currentSystemName} to ${systemName}`);
 
-        // Deactivate current system
-        if (this.systems[this.currentSystem]) {
-            this.systems[this.currentSystem].setActive(false);
-            const currentContainer = document.getElementById(`${this.currentSystem}Layers`);
-            if (currentContainer) {
-                currentContainer.style.display = 'none';
+        // Destroy active system if exists
+        if (this.activeSystem) {
+            console.log(`  🗑️ Destroying ${this.currentSystemName} system...`);
+
+            // Deactivate system
+            if (this.activeSystem.setActive) {
+                this.activeSystem.setActive(false);
             }
+
+            // Destroy system
+            if (this.activeSystem.destroy) {
+                this.activeSystem.destroy();
+            }
+
+            // CanvasManager will destroy canvases when creating new ones
+            this.activeSystem = null;
         }
 
-        // Activate new system
-        this.currentSystem = systemName;
-        this.systems[systemName].setActive(true);
-
-        const newContainer = document.getElementById(`${systemName}Layers`);
-        if (newContainer) {
-            newContainer.style.display = 'block';
+        // Create and initialize new system
+        try {
+            this.activeSystem = await this.createSystem(systemName);
+            this.currentSystemName = systemName;
+            console.log(`✅ Switched to ${systemName} system`);
+            return true;
+        } catch (error) {
+            console.error(`❌ Failed to switch to ${systemName}:`, error);
+            return false;
         }
-
-        // Apply current parameters to new system
-        this.updateCurrentSystemParameters();
-
-        console.log(`✅ ${systemName} system activated`);
-        return true;
     }
 
     /**
-     * Update parameters for current system
+     * Update parameters for active system
      */
     updateCurrentSystemParameters() {
         const params = this.parameters.getAllParameters();
 
-        if (this.systems[this.currentSystem]) {
-            this.systems[this.currentSystem].updateParameters(params);
+        if (this.activeSystem && this.activeSystem.updateParameters) {
+            this.activeSystem.updateParameters(params);
         }
     }
 
@@ -245,14 +212,14 @@ export class VIB3Engine {
      * Get current system name
      */
     getCurrentSystem() {
-        return this.currentSystem;
+        return this.currentSystemName;
     }
 
     /**
-     * Get system instance
+     * Get active system instance
      */
-    getSystem(systemName) {
-        return this.systems[systemName];
+    getActiveSystemInstance() {
+        return this.activeSystem;
     }
 
     /**
@@ -296,7 +263,7 @@ export class VIB3Engine {
      */
     exportState() {
         return {
-            system: this.currentSystem,
+            system: this.currentSystemName,
             parameters: this.parameters.getAllParameters(),
             timestamp: new Date().toISOString(),
             version: '1.0.0'
@@ -306,9 +273,9 @@ export class VIB3Engine {
     /**
      * Import state
      */
-    importState(state) {
+    async importState(state) {
         if (state.system) {
-            this.switchSystem(state.system);
+            await this.switchSystem(state.system);
         }
         if (state.parameters) {
             this.parameters.setParameters(state.parameters);
@@ -320,12 +287,18 @@ export class VIB3Engine {
      * Destroy engine and clean up
      */
     destroy() {
-        Object.values(this.systems).forEach(system => {
-            if (system && system.destroy) {
-                system.destroy();
-            }
-        });
-        this.systems = {};
+        // Destroy active system
+        if (this.activeSystem && this.activeSystem.destroy) {
+            this.activeSystem.destroy();
+        }
+        this.activeSystem = null;
+
+        // Destroy canvas manager
+        if (this.canvasManager) {
+            this.canvasManager.destroy();
+        }
+        this.canvasManager = null;
+
         this.initialized = false;
         console.log('🗑️ VIB3+ Engine destroyed');
     }

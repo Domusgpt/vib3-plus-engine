@@ -98,6 +98,20 @@
             color: #000;
         }
 
+        .toggle-btn {
+            padding: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .toggle-btn.active {
+            background: linear-gradient(135deg, #00ff88, #00ffcc);
+            border-color: #00ff88;
+        }
+
+        .toggle-btn:not(.active) {
+            opacity: 0.5;
+        }
+
         select {
             width: 100%;
             padding: 0.5rem;
@@ -161,6 +175,31 @@
             overflow: hidden;
             position: relative;
             min-height: 600px;
+        }
+
+        .canvas-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                45deg,
+                transparent 15%,
+                rgba(0, 255, 255, 0.15) 40%,
+                rgba(255, 0, 255, 0.2) 50%,
+                rgba(255, 100, 0, 0.15) 60%,
+                transparent 85%
+            );
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            mix-blend-mode: screen;
+            pointer-events: none;
+        }
+
+        .canvas-container:hover::after {
+            opacity: 1;
         }
 
         #vib3-container {
@@ -550,6 +589,50 @@
                     </div>
                     <input type="range" id="speed" min="0.1" max="3" step="0.1" value="1.0">
                 </div>
+                <div class="slider-control">
+                    <div class="slider-label">
+                        <span>Morph Factor</span>
+                        <span class="slider-value" id="morphFactorValue">1.0</span>
+                    </div>
+                    <input type="range" id="morphFactor" min="0" max="2" step="0.1" value="1.0">
+                </div>
+                <div class="slider-control">
+                    <div class="slider-label">
+                        <span>Chaos</span>
+                        <span class="slider-value" id="chaosValue">0.2</span>
+                    </div>
+                    <input type="range" id="chaos" min="0" max="1" step="0.05" value="0.2">
+                </div>
+                <div class="slider-control">
+                    <div class="slider-label">
+                        <span>Intensity</span>
+                        <span class="slider-value" id="intensityValue">0.8</span>
+                    </div>
+                    <input type="range" id="intensity" min="0" max="1" step="0.05" value="0.8">
+                </div>
+                <div class="slider-control">
+                    <div class="slider-label">
+                        <span>Saturation</span>
+                        <span class="slider-value" id="saturationValue">0.8</span>
+                    </div>
+                    <input type="range" id="saturation" min="0" max="1" step="0.05" value="0.8">
+                </div>
+                <div class="slider-control">
+                    <div class="slider-label">
+                        <span>Dimension</span>
+                        <span class="slider-value" id="dimensionValue">4.0</span>
+                    </div>
+                    <input type="range" id="dimension" min="3.0" max="4.5" step="0.1" value="4.0">
+                </div>
+            </div>
+
+            <div class="control-group">
+                <h3>Interactivity</h3>
+                <button id="toggleMouse" class="toggle-btn active" data-toggle="mouse">🖱️ Mouse Reactive</button>
+                <button id="toggleTilt" class="toggle-btn active" data-toggle="tilt">📱 Device Tilt</button>
+                <button id="toggleAudio" class="toggle-btn" data-toggle="audio">🎵 Audio Reactive</button>
+                <button id="toggleEnhanced" class="toggle-btn active" data-toggle="enhanced">✨ Enhanced FX</button>
+                <button id="toggleAccentTwin" class="toggle-btn" data-toggle="accentTwin">🌟 Accent Twin</button>
             </div>
 
             <div class="control-group">
@@ -622,7 +705,21 @@
             rot4dZW: document.getElementById('rot4dZW'),
             gridDensity: document.getElementById('gridDensity'),
             hue: document.getElementById('hue'),
-            speed: document.getElementById('speed')
+            speed: document.getElementById('speed'),
+            morphFactor: document.getElementById('morphFactor'),
+            chaos: document.getElementById('chaos'),
+            intensity: document.getElementById('intensity'),
+            saturation: document.getElementById('saturation'),
+            dimension: document.getElementById('dimension')
+        };
+
+        // Interactivity state
+        const interactivityState = {
+            mouse: true,
+            tilt: true,
+            audio: false,
+            enhanced: true,
+            accentTwin: false
         };
 
         Object.entries(sliders).forEach(([param, slider]) => {
@@ -696,6 +793,99 @@
                 document.getElementById('status').textContent = 'Gallery full!';
             }
         });
+
+        // Interactivity toggle buttons
+        document.querySelectorAll('.toggle-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const toggle = btn.dataset.toggle;
+                interactivityState[toggle] = !interactivityState[toggle];
+                btn.classList.toggle('active', interactivityState[toggle]);
+
+                // Update engine with new interactivity state
+                const systemInstance = engine.getActiveSystemInstance();
+                if (systemInstance && systemInstance.setInteractivity) {
+                    systemInstance.setInteractivity(interactivityState);
+                }
+
+                console.log(`Toggle ${toggle}:`, interactivityState[toggle]);
+            });
+        });
+
+        // Device Orientation API for tilt → 6D rotation mapping
+        let deviceOrientationEnabled = false;
+        const baseRotations = {
+            rot4dXW: 0,
+            rot4dYW: 0,
+            rot4dZW: 0
+        };
+
+        function handleDeviceOrientation(event) {
+            if (!interactivityState.tilt) return;
+
+            const alpha = event.alpha || 0;  // Z-axis (compass direction)
+            const beta = event.beta || 0;    // X-axis (front-back tilt)
+            const gamma = event.gamma || 0;  // Y-axis (left-right tilt)
+
+            // Normalize values
+            const betaNorm = (beta - 90) / 90;   // -1 to 1
+            const gammaNorm = gamma / 90;         // -1 to 1
+            const alphaNorm = alpha / 180;        // 0 to 2
+
+            // Detect extreme tilt
+            const tiltIntensity = Math.sqrt(betaNorm * betaNorm + gammaNorm * gammaNorm);
+            const extremeTilt = tiltIntensity > 0.7;
+
+            // Dramatic 4D rotation scaling
+            const dramatic4DScale = extremeTilt ? 0.8 : 0.5;
+
+            // Map device orientation to 6D rotations (4D hyperspace planes)
+            const tiltRotations = {
+                rot4dXW: baseRotations.rot4dXW + (betaNorm * Math.PI / 180 * dramatic4DScale),
+                rot4dYW: baseRotations.rot4dYW + (gammaNorm * Math.PI / 180 * dramatic4DScale),
+                rot4dZW: baseRotations.rot4dZW + (alphaNorm * Math.PI / 180 * dramatic4DScale * 0.5)
+            };
+
+            // Apply tilt rotations to engine
+            Object.entries(tiltRotations).forEach(([param, value]) => {
+                engine.setParameter(param, value);
+                // Update UI sliders
+                const slider = sliders[param];
+                if (slider) {
+                    slider.value = value.toFixed(2);
+                    document.getElementById(`${param}Value`).textContent = value.toFixed(2);
+                }
+            });
+
+            // Update visual intensity based on tilt
+            if (extremeTilt && interactivityState.enhanced) {
+                const params = engine.getAllParameters();
+                engine.setParameter('intensity', Math.min(1, (params.intensity || 0.8) + tiltIntensity * 0.25));
+                engine.setParameter('chaos', Math.min(1, (params.chaos || 0.2) + Math.pow(tiltIntensity, 2) * 0.15));
+            }
+        }
+
+        // Request device orientation permission (iOS 13+)
+        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+            document.getElementById('toggleTilt').addEventListener('click', async () => {
+                if (!deviceOrientationEnabled && interactivityState.tilt) {
+                    try {
+                        const permission = await DeviceOrientationEvent.requestPermission();
+                        if (permission === 'granted') {
+                            window.addEventListener('deviceorientation', handleDeviceOrientation);
+                            deviceOrientationEnabled = true;
+                            console.log('✅ Device orientation enabled');
+                        }
+                    } catch (error) {
+                        console.error('Device orientation permission denied:', error);
+                    }
+                }
+            });
+        } else if (window.DeviceOrientationEvent) {
+            // Auto-enable for non-iOS devices
+            window.addEventListener('deviceorientation', handleDeviceOrientation);
+            deviceOrientationEnabled = true;
+            console.log('✅ Device orientation auto-enabled');
+        }
 
         console.log('%c🌟 VIB3+ Engine Ready', 'color: #00ffcc; font-size: 20px; font-weight: bold;');
         console.log('3 Systems: Quantum, Faceted, Holographic');
