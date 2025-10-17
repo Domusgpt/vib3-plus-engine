@@ -42,44 +42,44 @@ export class DeviceTiltHandler {
             rot4dZW: 0
         };
         
-        // Mapping configuration
+        // Mapping configuration - Mathematical device axis alignment
         this.mapping = {
-            // 🔷 NORMAL MODE: Conservative mapping (original behavior)
+            // 🔷 NORMAL MODE: Conservative mapping
             normal: {
-                // 3D SPACE ROTATIONS - Secondary mappings (lower sensitivity)
-                // Combined alpha+gamma -> 3D XY rotation
+                // 3D SPACE ROTATIONS - Direct device axis mapping
+                // Alpha (compass) -> XY rotation (horizontal plane)
                 alphaGammaToXY: {
-                    scale: 0.004, // Half sensitivity of 4D rotations
+                    scale: 0.006, // Compass to horizontal rotation
                     range: [-180, 180],
-                    clamp: [-1.0, 1.0]
+                    clamp: [-3.14, 3.14] // ±π radians (full rotation)
                 },
-                // Combined alpha+beta -> 3D XZ rotation
+                // Beta (front-back) -> XZ rotation (X around Z)
                 alphaBetaToXZ: {
-                    scale: 0.005,
-                    range: [-180, 180],
-                    clamp: [-1.0, 1.0]
-                },
-                // Combined beta+gamma -> 3D YZ rotation
-                betaGammaToYZ: {
-                    scale: 0.006,
+                    scale: 0.008,
                     range: [-90, 90],
-                    clamp: [-1.0, 1.0]
+                    clamp: [-1.57, 1.57] // ±π/2 radians
+                },
+                // Gamma (left-right) -> YZ rotation (Y around Z)
+                betaGammaToYZ: {
+                    scale: 0.008,
+                    range: [-90, 90],
+                    clamp: [-1.57, 1.57] // ±π/2 radians
                 },
 
-                // 4D HYPERSPACE ROTATIONS - Primary mappings
-                // Device beta (front-back tilt) -> 4D XW rotation
+                // 4D HYPERSPACE ROTATIONS - Projecting into W-space
+                // Beta projects X into W
                 betaToXW: {
-                    scale: 0.01, // Radians per degree of device tilt
-                    range: [-45, 45], // Degrees of device tilt to use
-                    clamp: [-1.5, 1.5] // 4D rotation limits (radians)
+                    scale: 0.01, // Stronger projection into 4D
+                    range: [-45, 45],
+                    clamp: [-1.5, 1.5]
                 },
-                // Device gamma (left-right tilt) -> 4D YW rotation
+                // Gamma projects Y into W
                 gammaToYW: {
-                    scale: 0.015,
+                    scale: 0.015, // Strongest for dramatic effect
                     range: [-30, 30],
                     clamp: [-1.5, 1.5]
                 },
-                // Device alpha (compass heading) -> 4D ZW rotation
+                // Alpha projects Z into W
                 alphaToZW: {
                     scale: 0.008,
                     range: [-180, 180],
@@ -89,37 +89,40 @@ export class DeviceTiltHandler {
             
             // 🚀 DRAMATIC MODE: 8x more sensitive with extended range
             dramatic: {
-                // 3D SPACE ROTATIONS - Secondary mappings (dramatic sensitivity)
+                // 3D SPACE ROTATIONS - 8x more sensitive
+                // Alpha (compass) -> XY rotation (horizontal plane)
                 alphaGammaToXY: {
-                    scale: 0.032, // 8x more sensitive
-                    range: [-180, 180],
-                    clamp: [-6.0, 6.0]
-                },
-                alphaBetaToXZ: {
-                    scale: 0.04, // 8x more sensitive
-                    range: [-180, 180],
-                    clamp: [-6.0, 6.0]
-                },
-                betaGammaToYZ: {
                     scale: 0.048, // 8x more sensitive
-                    range: [-120, 120],
-                    clamp: [-6.0, 6.0]
+                    range: [-180, 180],
+                    clamp: [-6.28, 6.28] // ±2π radians (double rotation)
+                },
+                // Beta (front-back) -> XZ rotation (X around Z)
+                alphaBetaToXZ: {
+                    scale: 0.064, // 8x more sensitive
+                    range: [-120, 120], // Extended range
+                    clamp: [-6.28, 6.28] // ±2π radians
+                },
+                // Gamma (left-right) -> YZ rotation (Y around Z)
+                betaGammaToYZ: {
+                    scale: 0.064, // 8x more sensitive
+                    range: [-120, 120], // Extended range
+                    clamp: [-6.28, 6.28] // ±2π radians
                 },
 
-                // 4D HYPERSPACE ROTATIONS - Primary mappings
-                // Device beta (front-back tilt) -> 4D XW rotation
+                // 4D HYPERSPACE ROTATIONS - 8x projection into W-space
+                // Beta projects X into W (dramatic)
                 betaToXW: {
                     scale: 0.08, // 8x more sensitive!
                     range: [-120, 120], // Extended range for dramatic effects
                     clamp: [-6.0, 6.0] // Much wider 4D rotation limits
                 },
-                // Device gamma (left-right tilt) -> 4D YW rotation
+                // Gamma projects Y into W (dramatic)
                 gammaToYW: {
                     scale: 0.12, // 8x more sensitive!
                     range: [-120, 120], // Extended range
                     clamp: [-6.0, 6.0]
                 },
-                // Device alpha (compass heading) -> 4D ZW rotation
+                // Alpha projects Z into W (dramatic)
                 alphaToZW: {
                     scale: 0.064, // 8x more sensitive!
                     range: [-180, 180],
@@ -325,42 +328,39 @@ export class DeviceTiltHandler {
         let alphaNormalized = alphaDeg;
         if (alphaNormalized > 180) alphaNormalized -= 360;
 
-        // === 3D SPACE ROTATIONS (Secondary mappings) ===
-        // Map combined alpha+gamma to XY rotation (compass + left-right)
-        const alphaGammaCombined = (alphaNormalized + gammaDeg) / 2;
-        const agClamped = Math.max(activeMapping.alphaGammaToXY.range[0],
-            Math.min(activeMapping.alphaGammaToXY.range[1], alphaGammaCombined));
+        // === 3D SPACE ROTATIONS (Mathematical device axis mapping) ===
+        // XY rotation: Compass heading (alpha) - rotating in horizontal X-Y plane
+        const alphaClamped3D = Math.max(activeMapping.alphaGammaToXY.range[0],
+            Math.min(activeMapping.alphaGammaToXY.range[1], alphaNormalized));
         const rot4dXY = this.baseRotation.rot4dXY +
-            (agClamped * activeMapping.alphaGammaToXY.scale * this.sensitivity);
+            (alphaClamped3D * activeMapping.alphaGammaToXY.scale * this.sensitivity);
 
-        // Map combined alpha+beta to XZ rotation (compass + front-back)
-        const alphaBetaCombined = (alphaNormalized + betaDeg) / 2;
-        const abClamped = Math.max(activeMapping.alphaBetaToXZ.range[0],
-            Math.min(activeMapping.alphaBetaToXZ.range[1], alphaBetaCombined));
+        // XZ rotation: Front-back tilt (beta) - X-axis rotating around Z
+        const betaClamped3D = Math.max(activeMapping.alphaBetaToXZ.range[0],
+            Math.min(activeMapping.alphaBetaToXZ.range[1], betaDeg));
         const rot4dXZ = this.baseRotation.rot4dXZ +
-            (abClamped * activeMapping.alphaBetaToXZ.scale * this.sensitivity);
+            (betaClamped3D * activeMapping.alphaBetaToXZ.scale * this.sensitivity);
 
-        // Map combined beta+gamma to YZ rotation (front-back + left-right)
-        const betaGammaCombined = (betaDeg + gammaDeg) / 2;
-        const bgClamped = Math.max(activeMapping.betaGammaToYZ.range[0],
-            Math.min(activeMapping.betaGammaToYZ.range[1], betaGammaCombined));
+        // YZ rotation: Left-right tilt (gamma) - Y-axis rotating around Z
+        const gammaClamped3D = Math.max(activeMapping.betaGammaToYZ.range[0],
+            Math.min(activeMapping.betaGammaToYZ.range[1], gammaDeg));
         const rot4dYZ = this.baseRotation.rot4dYZ +
-            (bgClamped * activeMapping.betaGammaToYZ.scale * this.sensitivity);
+            (gammaClamped3D * activeMapping.betaGammaToYZ.scale * this.sensitivity);
 
-        // === 4D HYPERSPACE ROTATIONS (Primary mappings) ===
-        // Map beta (front-back tilt) to XW rotation
+        // === 4D HYPERSPACE ROTATIONS (Projecting axes into W-space) ===
+        // XW rotation: Front-back tilt (beta) projects X-axis into 4D W-space
         const betaClamped = Math.max(activeMapping.betaToXW.range[0],
             Math.min(activeMapping.betaToXW.range[1], betaDeg));
         const rot4dXW = this.baseRotation.rot4dXW +
             (betaClamped * activeMapping.betaToXW.scale * this.sensitivity);
 
-        // Map gamma (left-right tilt) to YW rotation
+        // YW rotation: Left-right tilt (gamma) projects Y-axis into 4D W-space
         const gammaClamped = Math.max(activeMapping.gammaToYW.range[0],
             Math.min(activeMapping.gammaToYW.range[1], gammaDeg));
         const rot4dYW = this.baseRotation.rot4dYW +
             (gammaClamped * activeMapping.gammaToYW.scale * this.sensitivity);
 
-        // Map alpha (compass) to ZW rotation
+        // ZW rotation: Compass heading (alpha) projects Z-axis into 4D W-space
         const alphaClamped = Math.max(activeMapping.alphaToZW.range[0],
             Math.min(activeMapping.alphaToZW.range[1], alphaNormalized));
         const rot4dZW = this.baseRotation.rot4dZW +
