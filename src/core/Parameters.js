@@ -9,14 +9,11 @@ export class ParameterManager {
         this.params = {
             // Current variation
             variation: 0,
-
-            // 6D Rotation - FULL 4D Mathematics (all 6 rotation planes)
-            rot4dXY: 0.0,      // X-Y plane rotation (3D space)
-            rot4dXZ: 0.0,      // X-Z plane rotation (3D space)
-            rot4dYZ: 0.0,      // Y-Z plane rotation (3D space)
-            rot4dXW: 0.0,      // X-W plane rotation (4D hyperspace)
-            rot4dYW: 0.0,      // Y-W plane rotation (4D hyperspace)
-            rot4dZW: 0.0,      // Z-W plane rotation (4D hyperspace)
+            
+            // 4D Polytopal Mathematics
+            rot4dXW: 0.0,      // X-W plane rotation (-2 to 2)
+            rot4dYW: 0.0,      // Y-W plane rotation (-2 to 2) 
+            rot4dZW: 0.0,      // Z-W plane rotation (-2 to 2)
             dimension: 3.5,    // Dimensional level (3.0 to 4.5)
             
             // Holographic Visualization
@@ -35,13 +32,9 @@ export class ParameterManager {
         // Parameter definitions for validation and UI
         this.parameterDefs = {
             variation: { min: 0, max: 99, step: 1, type: 'int' },
-            // 6D Rotation - All 6 planes (0 to 2π radians)
-            rot4dXY: { min: 0, max: 6.28, step: 0.01, type: 'float' },
-            rot4dXZ: { min: 0, max: 6.28, step: 0.01, type: 'float' },
-            rot4dYZ: { min: 0, max: 6.28, step: 0.01, type: 'float' },
-            rot4dXW: { min: 0, max: 6.28, step: 0.01, type: 'float' },
-            rot4dYW: { min: 0, max: 6.28, step: 0.01, type: 'float' },
-            rot4dZW: { min: 0, max: 6.28, step: 0.01, type: 'float' },
+            rot4dXW: { min: -2, max: 2, step: 0.01, type: 'float' },
+            rot4dYW: { min: -2, max: 2, step: 0.01, type: 'float' },
+            rot4dZW: { min: -2, max: 2, step: 0.01, type: 'float' },
             dimension: { min: 3.0, max: 4.5, step: 0.01, type: 'float' },
             gridDensity: { min: 4, max: 100, step: 0.1, type: 'float' },
             morphFactor: { min: 0, max: 2, step: 0.01, type: 'float' },
@@ -50,7 +43,7 @@ export class ParameterManager {
             hue: { min: 0, max: 360, step: 1, type: 'int' },
             intensity: { min: 0, max: 1, step: 0.01, type: 'float' },
             saturation: { min: 0, max: 1, step: 0.01, type: 'float' },
-            geometry: { min: 0, max: 23, step: 1, type: 'int' }  // 24 geometries (0-23)
+            geometry: { min: 0, max: 7, step: 1, type: 'int' }
         };
         
         // Default parameter backup for reset
@@ -210,23 +203,19 @@ export class ParameterManager {
     }
     
     /**
-     * Randomize all parameters (including 6D rotation)
+     * Randomize all parameters
      */
     randomizeAll() {
-        // Randomize all 6 rotation planes
-        this.params.rot4dXY = Math.random() * 6.28;
-        this.params.rot4dXZ = Math.random() * 6.28;
-        this.params.rot4dYZ = Math.random() * 6.28;
-        this.params.rot4dXW = Math.random() * 6.28;
-        this.params.rot4dYW = Math.random() * 6.28;
-        this.params.rot4dZW = Math.random() * 6.28;
+        this.params.rot4dXW = Math.random() * 4 - 2;
+        this.params.rot4dYW = Math.random() * 4 - 2;
+        this.params.rot4dZW = Math.random() * 4 - 2;
         this.params.dimension = 3.0 + Math.random() * 1.5;
-        this.params.gridDensity = 4 + Math.random() * 96;
+        this.params.gridDensity = 4 + Math.random() * 26;
         this.params.morphFactor = Math.random() * 2;
         this.params.chaos = Math.random();
         this.params.speed = 0.1 + Math.random() * 2.9;
         this.params.hue = Math.random() * 360;
-        this.params.geometry = Math.floor(Math.random() * 24);  // 0-23
+        this.params.geometry = Math.floor(Math.random() * 8);
     }
     
     /**

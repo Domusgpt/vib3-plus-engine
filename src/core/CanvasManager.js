@@ -1,227 +1,214 @@
 /**
- * CanvasManager - Smart WebGL Context & Canvas Lifecycle Management
- * A Paul Phillips Manifestation
- *
- * Handles proper canvas creation/destruction to avoid WebGL context limits.
- * Destroys active system before initializing new system.
+ * Dead Simple Canvas Manager - Just hide/show containers + fresh engines
+ * No canvas destruction - HTML canvases stay put, just switch visibility
  */
 
 export class CanvasManager {
-    constructor(containerId) {
-        this.container = document.getElementById(containerId);
-        if (!this.container) {
-            throw new Error(`Container not found: ${containerId}`);
+  constructor() {
+    this.currentSystem = null;
+    this.currentEngine = null;
+  }
+
+  async switchToSystem(systemName, engineClasses) {
+    console.log(`🔄 DESTROY OLD → CREATE NEW: ${systemName}`);
+    
+    // STEP 1: DESTROY current engine completely
+    if (this.currentEngine) {
+      if (this.currentEngine.setActive) {
+        this.currentEngine.setActive(false);
+      }
+      if (this.currentEngine.destroy) {
+        this.currentEngine.destroy();
+      }
+      console.log('💥 Old engine destroyed');
+    }
+    
+    // STEP 2: DESTROY old WebGL contexts 
+    this.destroyOldWebGLContexts();
+    
+    // STEP 3: DESTROY all canvases + CREATE 5 fresh ones
+    this.destroyAllCanvasesAndCreateFresh(systemName);
+    
+    // STEP 4: CREATE fresh engine
+    const engine = await this.createFreshEngine(systemName, engineClasses);
+    
+    // STEP 5: Start new engine
+    if (engine && engine.setActive) {
+      engine.setActive(true);
+    }
+    
+    this.currentSystem = systemName;
+    this.currentEngine = engine;
+    console.log(`✅ DESTROY → CREATE complete: ${systemName} ready`);
+    return engine;
+  }
+
+  destroyOldWebGLContexts() {
+    console.log('💥 COMPLETE DESTRUCTION: WebGL contexts + old system cleanup...');
+    
+    // STEP 1: Kill all WebGL contexts first
+    const allCanvases = document.querySelectorAll('canvas');
+    let destroyedCount = 0;
+    
+    allCanvases.forEach(canvas => {
+      // Get any existing WebGL context
+      const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+      if (gl) {
+        // Force context loss
+        const loseContextExt = gl.getExtension('WEBGL_lose_context');
+        if (loseContextExt) {
+          loseContextExt.loseContext();
+          destroyedCount++;
         }
-
-        this.activeSystem = null;
-        this.activeCanvases = new Map(); // Track canvases by layer name
-        this.activeContexts = new Map(); // Track WebGL contexts
-
-        console.log('🎨 CanvasManager initialized');
+      }
+    });
+    
+    // STEP 2: Clear all global engine references (old system cleanup)
+    if (window.engine) {
+      console.log('💥 Clearing window.engine');
+      window.engine = null;
     }
-
-    /**
-     * Destroy all active canvases and WebGL contexts
-     */
-    destroyActiveSystem() {
-        if (!this.activeSystem) {
-            return; // Nothing to destroy
-        }
-
-        console.log(`🗑️ Destroying ${this.activeSystem} system...`);
-
-        // Lose all WebGL contexts first (critical for cleanup)
-        this.activeContexts.forEach((gl, canvasId) => {
-            if (gl) {
-                const loseContext = gl.getExtension('WEBGL_lose_context');
-                if (loseContext) {
-                    loseContext.loseContext();
-                    console.log(`  ✓ Lost WebGL context: ${canvasId}`);
-                }
-            }
-        });
-
-        // Clear context tracking
-        this.activeContexts.clear();
-
-        // Remove all canvases from DOM
-        this.activeCanvases.forEach((canvas, layerId) => {
-            if (canvas && canvas.parentNode) {
-                canvas.parentNode.removeChild(canvas);
-                console.log(`  ✓ Removed canvas: ${layerId}`);
-            }
-        });
-
-        // Clear canvas tracking
-        this.activeCanvases.clear();
-
-        // Clear container
-        this.container.innerHTML = '';
-
-        console.log(`✅ ${this.activeSystem} system destroyed`);
-        this.activeSystem = null;
+    if (window.quantumEngine) {
+      console.log('💥 Clearing window.quantumEngine');
+      window.quantumEngine = null;
     }
-
-    /**
-     * Get canvas IDs for a specific system (matches reference architecture)
-     * Faceted: 'background-canvas', 'shadow-canvas', etc.
-     * Quantum: 'quantum-background-canvas', 'quantum-shadow-canvas', etc.
-     * Holographic: 'holo-background-canvas', 'holo-shadow-canvas', etc.
-     */
-    getCanvasIdsForSystem(systemName) {
-        const baseIds = ['background-canvas', 'shadow-canvas', 'content-canvas', 'highlight-canvas', 'accent-canvas'];
-
-        switch (systemName) {
-            case 'faceted':
-                return baseIds; // Direct IDs for faceted
-            case 'quantum':
-                return baseIds.map(id => `quantum-${id}`);
-            case 'holographic':
-                return baseIds.map(id => `holo-${id}`);
-            default:
-                return baseIds;
-        }
+    if (window.holographicSystem) {
+      console.log('💥 Clearing window.holographicSystem');
+      window.holographicSystem = null;
     }
-
-    /**
-     * Create canvases for a new system
-     * CRITICAL: Engines find these canvases by ID, not passed as parameters!
-     * @param {string} systemName - 'quantum', 'faceted', or 'holographic'
-     * @returns {string[]} - Array of canvas IDs created
-     */
-    createSystemCanvases(systemName) {
-        console.log(`🎨 Creating canvases for ${systemName} system...`);
-
-        // Destroy any active system first
-        if (this.activeSystem) {
-            this.destroyActiveSystem();
-        }
-
-        // Get container dimensions
-        const rect = this.container.getBoundingClientRect();
-        const width = rect.width || window.innerWidth;
-        const height = rect.height || window.innerHeight;
-
-        // Create container for this system's layers
-        const systemContainer = document.createElement('div');
-        systemContainer.id = systemName === 'faceted' ? 'vib34dLayers' : `${systemName}Layers`;
-        systemContainer.className = 'system-container';
-        systemContainer.style.cssText = `
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        `;
-
-        // Get canvas IDs for this system
-        const canvasIds = this.getCanvasIdsForSystem(systemName);
-
-        // Create each canvas with specific ID that engines expect
-        canvasIds.forEach((canvasId, index) => {
-            const canvas = document.createElement('canvas');
-
-            canvas.id = canvasId; // CRITICAL: Exact ID that engine will search for
-            canvas.className = 'visualization-canvas layer-canvas';
-            canvas.width = width;
-            canvas.height = height;
-            canvas.style.cssText = `
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                z-index: ${index};
-                pointer-events: ${canvasId.includes('content') ? 'auto' : 'none'};
-            `;
-
-            systemContainer.appendChild(canvas);
-            this.activeCanvases.set(canvasId, canvas);
-
-            console.log(`  ✓ Created canvas: ${canvasId} (${width}x${height})`);
-        });
-
-        // Add container to DOM
-        this.container.appendChild(systemContainer);
-
-        this.activeSystem = systemName;
-        console.log(`✅ ${systemName} canvases ready (engines will find by ID)`);
-
-        return canvasIds; // Return IDs, not canvas objects
+    if (window.polychoraSystem) {
+      console.log('💥 Clearing window.polychoraSystem');
+      window.polychoraSystem = null;
     }
+    
+    console.log(`💥 DESTRUCTION COMPLETE: ${destroyedCount} WebGL contexts destroyed, all engine refs cleared`);
+  }
 
-    /**
-     * Register a WebGL context for tracking (for proper cleanup)
-     * @param {string} layerName - Name of the layer this context belongs to
-     * @param {WebGLRenderingContext} gl - The WebGL context
-     */
-    registerContext(layerName, gl) {
-        const canvasId = `${this.activeSystem}-${layerName}-canvas`;
-        this.activeContexts.set(canvasId, gl);
-        console.log(`📋 Registered WebGL context: ${canvasId}`);
+  destroyAllCanvasesAndCreateFresh(systemName) {
+    console.log('💥 DESTROYING ALL CANVASES + CREATING 5 FRESH ONES');
+    
+    // STEP 1: DESTROY all existing canvases completely
+    const allCanvases = document.querySelectorAll('canvas');
+    allCanvases.forEach(canvas => canvas.remove());
+    console.log(`💥 Destroyed ${allCanvases.length} old canvases`);
+    
+    // STEP 2: Clear all containers
+    const containers = ['vib34dLayers', 'quantumLayers', 'holographicLayers', 'polychoraLayers'];
+    containers.forEach(containerId => {
+      const container = document.getElementById(containerId);
+      if (container) {
+        container.innerHTML = '';
+        container.style.display = 'none';
+      }
+    });
+    
+    // STEP 3: CREATE 5 fresh canvases for the new system
+    const targetId = systemName === 'faceted' ? 'vib34dLayers' : `${systemName}Layers`;
+    const targetContainer = document.getElementById(targetId);
+    
+    if (!targetContainer) {
+      console.error(`❌ Container ${targetId} not found`);
+      return;
     }
-
-    /**
-     * Get a canvas by layer name
-     * @param {string} layerName - Layer name (e.g., 'content', 'background')
-     * @returns {HTMLCanvasElement|null}
-     */
-    getCanvas(layerName) {
-        return this.activeCanvases.get(layerName) || null;
+    
+    // Create canvas IDs for this system
+    const canvasIds = this.getCanvasIdsForSystem(systemName);
+    
+    // Create 5 fresh canvases
+    canvasIds.forEach((canvasId, index) => {
+      const canvas = document.createElement('canvas');
+      canvas.id = canvasId;
+      canvas.className = 'visualization-canvas';
+      canvas.style.position = 'absolute';
+      canvas.style.top = '0';
+      canvas.style.left = '0';
+      canvas.style.width = '100%';
+      canvas.style.height = '100%';
+      canvas.style.zIndex = index + 1;
+      
+      // Set canvas dimensions
+      const viewWidth = window.innerWidth;
+      const viewHeight = window.innerHeight;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = viewWidth * dpr;
+      canvas.height = viewHeight * dpr;
+      
+      targetContainer.appendChild(canvas);
+    });
+    
+    // Show the target container
+    targetContainer.style.display = 'block';
+    targetContainer.style.visibility = 'visible';
+    targetContainer.style.opacity = '1';
+    
+    console.log(`✅ Created 5 fresh canvases for ${systemName}: ${canvasIds.join(', ')}`);
+  }
+  
+  getCanvasIdsForSystem(systemName) {
+    const baseIds = ['background-canvas', 'shadow-canvas', 'content-canvas', 'highlight-canvas', 'accent-canvas'];
+    
+    switch (systemName) {
+      case 'faceted':
+        return baseIds;
+      case 'quantum':
+        return baseIds.map(id => `quantum-${id}`);
+      case 'holographic':
+        return baseIds.map(id => `holo-${id}`);
+      case 'polychora':
+        return baseIds.map(id => `polychora-${id}`);
+      default:
+        return baseIds;
     }
-
-    /**
-     * Get all active canvases
-     * @returns {Map<string, HTMLCanvasElement>}
-     */
-    getAllCanvases() {
-        return this.activeCanvases;
+  }
+  
+  async createFreshEngine(systemName, engineClasses) {
+    console.log(`🚀 Creating fresh ${systemName} engine`);
+    
+    let engine = null;
+    
+    try {
+      switch(systemName) {
+        case 'faceted':
+          if (engineClasses.VIB34DIntegratedEngine) {
+            engine = new engineClasses.VIB34DIntegratedEngine();
+            window.engine = engine;
+            console.log('✅ Fresh Faceted engine');
+          }
+          break;
+          
+        case 'quantum':
+          if (engineClasses.QuantumEngine) {
+            engine = new engineClasses.QuantumEngine();
+            window.quantumEngine = engine;
+            console.log('✅ Fresh Quantum engine');
+          }
+          break;
+          
+        case 'holographic':
+          if (engineClasses.RealHolographicSystem) {
+            engine = new engineClasses.RealHolographicSystem();
+            window.holographicSystem = engine;
+            console.log('✅ Fresh Holographic engine');
+          }
+          break;
+          
+        case 'polychora':
+          if (engineClasses.NewPolychoraEngine) {
+            engine = new engineClasses.NewPolychoraEngine();
+            window.newPolychoraEngine = engine;
+            console.log('✅ Fresh TRUE 4D Polychora Engine with VIB34D DNA');
+          }
+          break;
+          
+        default:
+          console.error(`❌ Unknown system: ${systemName}`);
+      }
+      
+    } catch (error) {
+      console.error(`💥 Engine creation failed for ${systemName}:`, error);
+      engine = null;
     }
-
-    /**
-     * Resize all active canvases
-     * @param {number} width - New width
-     * @param {number} height - New height
-     */
-    resizeCanvases(width, height) {
-        this.activeCanvases.forEach((canvas, layerName) => {
-            canvas.width = width;
-            canvas.height = height;
-            console.log(`  ✓ Resized ${layerName}: ${width}x${height}`);
-        });
-        console.log(`🔄 Resized ${this.activeCanvases.size} canvases to ${width}x${height}`);
-    }
-
-    /**
-     * Get current active system name
-     * @returns {string|null}
-     */
-    getActiveSystem() {
-        return this.activeSystem;
-    }
-
-    /**
-     * Check if a system is currently active
-     * @param {string} systemName
-     * @returns {boolean}
-     */
-    isSystemActive(systemName) {
-        return this.activeSystem === systemName;
-    }
-
-    /**
-     * Complete cleanup - destroy everything
-     */
-    destroy() {
-        this.destroyActiveSystem();
-        this.container.innerHTML = '';
-        console.log('🗑️ CanvasManager destroyed');
-    }
+    
+    return engine;
+  }
 }
-
-/**
- * A Paul Phillips Manifestation
- * "The Revolution Will Not be in a Structured Format"
- * © 2025 Paul Phillips - Clear Seas Solutions LLC
- */

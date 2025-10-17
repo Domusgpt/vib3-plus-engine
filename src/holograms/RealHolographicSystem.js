@@ -13,7 +13,8 @@ export class RealHolographicSystem {
         this.totalVariants = 30;
         this.isActive = false;
         
-        // REMOVED: Built-in reactivity - ReactivityManager handles all interactions now
+        // Conditional reactivity: Use built-in only if ReactivityManager not active
+        this.useBuiltInReactivity = !window.reactivityManager;
         
         // Audio reactivity system
         this.audioEnabled = false;
@@ -48,7 +49,7 @@ export class RealHolographicSystem {
     initialize() {
         console.log('🎨 Initializing REAL Holographic System for Active Holograms tab...');
         this.createVisualizers();
-        // REMOVED: Built-in reactivity - ReactivityManager handles all interactions
+        this.setupCenterDistanceReactivity(); // NEW: Center-distance grid density changes
         this.updateVariantDisplay();
         this.startRenderLoop();
     }
@@ -238,10 +239,6 @@ export class RealHolographicSystem {
             hue: parseFloat(document.getElementById('hue')?.value || 320),
             intensity: parseFloat(document.getElementById('intensity')?.value || 0.6),
             saturation: parseFloat(document.getElementById('saturation')?.value || 0.8),
-            // ALL 6 rotations
-            rot4dXY: parseFloat(document.getElementById('rot4dXY')?.value || 0.0),
-            rot4dXZ: parseFloat(document.getElementById('rot4dXZ')?.value || 0.0),
-            rot4dYZ: parseFloat(document.getElementById('rot4dYZ')?.value || 0.0),
             rot4dXW: parseFloat(document.getElementById('rot4dXW')?.value || 0.0),
             rot4dYW: parseFloat(document.getElementById('rot4dYW')?.value || 0.0),
             rot4dZW: parseFloat(document.getElementById('rot4dZW')?.value || 0.0),
@@ -436,43 +433,22 @@ export class RealHolographicSystem {
                         currentValue = Math.min(3.0, 1.0 + (audioIntensity * 2.0));
                         break;
                         
-                    case 'rot4dXY':
-                        // Movement: Energy-driven 3D rotation
-                        if (!this.audioRotationXY) this.audioRotationXY = 0;
-                        this.audioRotationXY += audioIntensity * 0.05;
-                        currentValue = this.audioRotationXY % (Math.PI * 2);
-                        break;
-
-                    case 'rot4dXZ':
-                        // Movement: Mid-frequency 3D rotation
-                        if (!this.audioRotationXZ) this.audioRotationXZ = 0;
-                        this.audioRotationXZ += audioData.mid * sensitivityMultiplier * 0.06;
-                        currentValue = this.audioRotationXZ % (Math.PI * 2);
-                        break;
-
-                    case 'rot4dYZ':
-                        // Movement: High-frequency 3D rotation
-                        if (!this.audioRotationYZ) this.audioRotationYZ = 0;
-                        this.audioRotationYZ += audioData.high * sensitivityMultiplier * 0.04;
-                        currentValue = this.audioRotationYZ % (Math.PI * 2);
-                        break;
-
                     case 'rot4dXW':
-                        // Movement: Bass-driven 4D rotation
+                        // Movement: Bass-driven rotation
                         if (!this.audioRotationXW) this.audioRotationXW = 0;
                         this.audioRotationXW += bassIntensity * 0.1;
                         currentValue = this.audioRotationXW % (Math.PI * 2);
                         break;
-
+                        
                     case 'rot4dYW':
-                        // Movement: Mid-frequency 4D rotation
+                        // Movement: Mid-frequency rotation
                         if (!this.audioRotationYW) this.audioRotationYW = 0;
                         this.audioRotationYW += audioData.mid * sensitivityMultiplier * 0.08;
                         currentValue = this.audioRotationYW % (Math.PI * 2);
                         break;
-
+                        
                     case 'rot4dZW':
-                        // Movement: High-frequency 4D rotation
+                        // Movement: High-frequency rotation  
                         if (!this.audioRotationZW) this.audioRotationZW = 0;
                         this.audioRotationZW += audioData.high * sensitivityMultiplier * 0.06;
                         currentValue = this.audioRotationZW % (Math.PI * 2);
@@ -487,9 +463,8 @@ export class RealHolographicSystem {
         });
     }
     
-    // REMOVED: setupCenterDistanceReactivity - ReactivityManager handles all interactions
-    removedSetupCenterDistanceReactivity() {
-        if (true) { // Disabled
+    setupCenterDistanceReactivity() {
+        if (!this.useBuiltInReactivity) {
             console.log('✨ Holographic built-in reactivity DISABLED - ReactivityManager active');
             return;
         }
