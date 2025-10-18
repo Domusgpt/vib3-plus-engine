@@ -22,13 +22,14 @@ let loadingComplete = false;
 function initializeLoadingStates() {
     console.log('⏳ Initializing Loading States System...');
 
-    // Create loading overlay
-    createLoadingOverlay();
+    // TEMPORARILY DISABLED - Focus on fixing core layout first
+    // createLoadingOverlay();
+    // trackLoadingProgress();
 
-    // Track loading steps
-    trackLoadingProgress();
+    // Mark as complete immediately
+    loadingComplete = true;
 
-    console.log('✅ Loading States System initialized');
+    console.log('✅ Loading States System initialized (DISABLED FOR DEBUGGING)');
 }
 
 /**

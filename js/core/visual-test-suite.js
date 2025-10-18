@@ -25,12 +25,13 @@ let testResults = {
 function initializeVisualTestSuite() {
     console.log('🧪 Initializing Visual Test Suite...');
 
-    // Run tests after everything loads
-    setTimeout(() => {
-        runAllVisualTests();
-    }, 4000);
+    // Don't auto-run tests during debugging
+    // setTimeout(() => {
+    //     runAllVisualTests();
+    // }, 4000);
 
-    console.log('✅ Visual Test Suite initialized');
+    console.log('✅ Visual Test Suite initialized (auto-run disabled)');
+    console.log('💡 Run window.runAllVisualTests() manually when needed');
 }
 
 /**

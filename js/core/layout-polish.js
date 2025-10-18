@@ -80,7 +80,7 @@ function detectMobile() {
  * Fix system button icons not showing
  */
 function fixSystemButtonIcons() {
-    console.log('🔧 Fixing system button icons...');
+    console.log('🔧 Fixing system button display...');
 
     const systemButtons = document.querySelectorAll('.system-btn');
 
@@ -88,71 +88,28 @@ function fixSystemButtonIcons() {
         const iconSpan = btn.querySelector('.system-icon');
         const textSpan = btn.querySelector('span:not(.system-icon)');
 
-        // On mobile, ensure icon is visible even if SVG hasn't loaded
+        // On mobile, just ensure proper display - don't mess with content
         if (layoutState.isMobile) {
-            if (iconSpan) {
-                // Ensure icon span is displayed
-                iconSpan.style.display = 'inline-flex';
-                iconSpan.style.minWidth = '24px';
-                iconSpan.style.minHeight = '24px';
-                iconSpan.style.alignItems = 'center';
-                iconSpan.style.justifyContent = 'center';
-
-                // If icon is empty (SVG not loaded), add fallback text
-                if (!iconSpan.innerHTML || iconSpan.innerHTML.trim() === '') {
-                    const systemName = btn.dataset.system;
-                    const fallbackIcons = {
-                        'faceted': '◆',
-                        'quantum': '◉',
-                        'holographic': '✦',
-                        'polychora': '⬡'
-                    };
-                    iconSpan.textContent = fallbackIcons[systemName] || '●';
-                    iconSpan.style.fontSize = '1.2rem';
-                }
-            }
-
-            // Hide text on mobile
+            // Hide text on mobile (show icon only)
             if (textSpan && !textSpan.classList.contains('system-icon')) {
                 textSpan.style.display = 'none';
             }
         } else {
             // Desktop: show both
-            if (iconSpan) iconSpan.style.display = '';
             if (textSpan) textSpan.style.display = '';
         }
     });
 
-    console.log('✅ System button icons fixed');
+    console.log('✅ System button display fixed (icons left as-is)');
 }
 
 /**
  * Setup icon loading fix with observer
  */
 function setupIconLoadingFix() {
-    // Re-check icons when geometric-icons module loads
-    let iconCheckAttempts = 0;
-    const maxAttempts = 10;
-
-    const checkIcons = setInterval(() => {
-        iconCheckAttempts++;
-
-        // Check if geometric icons have loaded
-        const iconSpans = document.querySelectorAll('.system-icon');
-        let iconsLoaded = false;
-
-        iconSpans.forEach(span => {
-            if (span.querySelector('svg')) {
-                iconsLoaded = true;
-            }
-        });
-
-        if (iconsLoaded || iconCheckAttempts >= maxAttempts) {
-            clearInterval(checkIcons);
-            console.log(`✅ Icons ${iconsLoaded ? 'loaded' : 'using fallback'} after ${iconCheckAttempts} attempts`);
-            fixSystemButtonIcons(); // Re-fix with actual icons
-        }
-    }, 500);
+    // Let geometric-icons module handle icon loading
+    // We just ensure layout is correct
+    console.log('⏭️ Skipping icon loading checks - using HTML emojis/SVG as-is');
 }
 
 /**
@@ -224,12 +181,12 @@ function applyLayout() {
     canvasContainer.style.right = '0';
     canvasContainer.style.overflow = 'hidden';
 
-    // Apply control panel positioning
+    // DON'T set fixed height on control panel - let CSS handle it
+    // Just ensure positioning
     controlPanel.style.position = 'fixed';
     controlPanel.style.bottom = '0';
     controlPanel.style.left = '0';
     controlPanel.style.right = '0';
-    controlPanel.style.height = `${layoutState.bezelHeight}px`;
 
     // Force layout recalculation
     void canvasContainer.offsetHeight;
@@ -426,22 +383,34 @@ function fixBezelTabsOnMobile() {
  * Force initial layout after DOM loads
  */
 function forceInitialLayout() {
-    // Wait for all modules to load
-    setTimeout(() => {
-        console.log('🚀 Forcing initial layout...');
-        detectMobile();
-        calculateLayout();
-        applyLayout();
-        fixSystemButtonIcons();
-        fixBezelTabsOnMobile();
-        setupBezelToggleOverride();
-    }, 1000);
+    // Wait for VIB3+ system to fully initialize (after loading screen)
+    const waitForSystem = () => {
+        if (window.isLoadingComplete && window.isLoadingComplete()) {
+            console.log('🚀 System loaded, applying layout fixes...');
+            detectMobile();
+            calculateLayout();
+            applyLayout();
+            fixSystemButtonIcons();
+            fixBezelTabsOnMobile();
+            setupBezelToggleOverride();
+        } else {
+            setTimeout(waitForSystem, 500);
+        }
+    };
 
-    // Second pass after geometric icons should have loaded
-    setTimeout(() => {
-        console.log('🔄 Second layout pass (post-icons)...');
-        fixSystemButtonIcons();
-    }, 2000);
+    // Start checking after a short delay
+    setTimeout(waitForSystem, 1000);
+
+    // Also listen for the vib3-loaded event
+    window.addEventListener('vib3-loaded', () => {
+        console.log('🔄 VIB3+ loaded event - applying layout fixes...');
+        setTimeout(() => {
+            detectMobile();
+            fixSystemButtonIcons();
+            calculateLayout();
+            applyLayout();
+        }, 200);
+    });
 }
 
 // Initialize on load

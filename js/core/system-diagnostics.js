@@ -31,10 +31,10 @@ let debugOverlayElement = null;
 function initializeSystemDiagnostics() {
     console.log('🔬 Initializing System Diagnostics...');
 
-    // Run diagnostics after everything loads
-    setTimeout(() => {
-        runCompleteDiagnostics();
-    }, 3000);
+    // Don't auto-run diagnostics during debugging
+    // setTimeout(() => {
+    //     runCompleteDiagnostics();
+    // }, 3000);
 
     // Create debug overlay
     createDebugOverlay();
@@ -47,8 +47,8 @@ function initializeSystemDiagnostics() {
         }
     });
 
-    console.log('✅ System Diagnostics initialized');
-    console.log('⌨️ Press Ctrl+Shift+D to toggle debug overlay');
+    console.log('✅ System Diagnostics initialized (auto-run disabled)');
+    console.log('⌨️ Press Ctrl+Shift+D to manually run diagnostics');
 }
 
 /**
