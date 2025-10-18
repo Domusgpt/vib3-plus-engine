@@ -10,7 +10,7 @@
     max-width: 100% !important;
     height: auto;
     max-height: 65vh;
-    background: linear-gradient(180deg, rgba(0,0,0,0.92), rgba(0,15,30,0.95));
+    background: linear-gradient(180deg, rgba(0,0,0,0.85), rgba(0,15,30,0.9));
     border-top: 2px solid rgba(0, 255, 255, 0.3);
     border-right: none;
     border-radius: 0;
@@ -23,6 +23,15 @@
     overflow: hidden;
 }
 
+/* Landscape: Hide bezel for projection mode */
+@media (orientation: landscape) and (max-height: 500px) {
+    .control-panel {
+        transform: translateY(100%);
+        opacity: 0;
+        pointer-events: none;
+    }
+}
+
 /* Collapsed state */
 .control-panel.collapsed {
     max-height: 52px;
@@ -32,17 +41,8 @@
     display: none;
 }
 
-/* Canvas container adjustment - DYNAMIC via layout-polish.js */
-.canvas-container {
-    position: fixed !important;
-    top: 60px;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 52px; /* Default for collapsed - overridden by layout-polish.js */
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    overflow: hidden;
-    background: #000;
-}
+/* Canvas is full screen - no adjustment needed */
+/* Header and bezel overlay on top of canvas */
 
 /* These are overridden by layout-polish.js for dynamic sizing */
 .control-panel.collapsed ~ .canvas-container {

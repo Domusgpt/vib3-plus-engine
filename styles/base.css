@@ -14,15 +14,26 @@ body {
     position: relative;
 }
 
-/* Canvas container - main visualization area */
+/* Projection Mode: Hide all UI in landscape */
+body.projection-mode .top-bar,
+body.projection-mode .control-panel,
+body.projection-mode #floating-debug-btn {
+    transform: translateY(200%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Canvas container - FULL SCREEN (UI overlays on top) */
 .canvas-container {
     position: fixed;
-    top: 60px;
+    top: 0;
     left: 0;
     right: 0;
-    bottom: 52px;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
     background: #000;
-    transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1;
 }
 
 .visualization-canvas {
