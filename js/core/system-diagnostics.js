@@ -47,8 +47,34 @@ function initializeSystemDiagnostics() {
         }
     });
 
+    // Mobile: Triple-tap on logo to open diagnostics
+    let tapCount = 0;
+    let tapTimer = null;
+    const logo = document.querySelector('.logo');
+
+    if (logo) {
+        logo.addEventListener('click', (e) => {
+            tapCount++;
+
+            if (tapTimer) clearTimeout(tapTimer);
+
+            if (tapCount === 3) {
+                toggleDebugOverlay();
+                tapCount = 0;
+            }
+
+            tapTimer = setTimeout(() => {
+                tapCount = 0;
+            }, 1000);
+        });
+        console.log('📱 Mobile: Triple-tap logo to open diagnostics');
+    }
+
+    // Add floating debug button (mobile-friendly)
+    createFloatingDebugButton();
+
     console.log('✅ System Diagnostics initialized (auto-run disabled)');
-    console.log('⌨️ Press Ctrl+Shift+D to manually run diagnostics');
+    console.log('⌨️ Desktop: Ctrl+Shift+D | Mobile: Triple-tap logo or use floating button');
 }
 
 /**
@@ -397,21 +423,22 @@ function createDebugOverlay() {
     debugOverlayElement.id = 'system-diagnostics-overlay';
     debugOverlayElement.style.cssText = `
         position: fixed;
-        top: 100px;
-        left: 20px;
-        width: 400px;
-        max-height: calc(100vh - 120px);
+        top: 70px;
+        left: 10px;
+        right: 10px;
+        max-width: 600px;
+        max-height: calc(100vh - 140px);
         background: rgba(0, 0, 0, 0.95);
         border: 2px solid #00ffff;
         border-radius: 10px;
-        padding: 20px;
+        padding: 15px;
         font-family: 'Courier New', monospace;
-        font-size: 0.75rem;
+        font-size: 0.7rem;
         color: #00ff00;
         z-index: 10002;
         display: none;
         overflow-y: auto;
-        line-height: 1.6;
+        line-height: 1.4;
     `;
 
     // Add close button
@@ -419,15 +446,16 @@ function createDebugOverlay() {
     closeBtn.textContent = '× Close';
     closeBtn.style.cssText = `
         position: absolute;
-        top: 10px;
-        right: 10px;
+        top: 8px;
+        right: 8px;
         background: rgba(255, 0, 0, 0.8);
         border: 1px solid #ff0000;
         color: #fff;
-        padding: 4px 8px;
-        border-radius: 4px;
+        padding: 6px 12px;
+        border-radius: 6px;
         cursor: pointer;
-        font-size: 0.7rem;
+        font-size: 0.75rem;
+        font-weight: bold;
     `;
     closeBtn.onclick = () => toggleDebugOverlay();
     debugOverlayElement.appendChild(closeBtn);
@@ -435,10 +463,59 @@ function createDebugOverlay() {
     // Add content container
     const content = document.createElement('div');
     content.id = 'debug-content';
-    content.style.marginTop = '30px';
+    content.style.marginTop = '35px';
     debugOverlayElement.appendChild(content);
 
     document.body.appendChild(debugOverlayElement);
+}
+
+/**
+ * Create floating debug button (mobile-friendly)
+ */
+function createFloatingDebugButton() {
+    const floatingBtn = document.createElement('button');
+    floatingBtn.id = 'floating-debug-btn';
+    floatingBtn.innerHTML = '🔬';
+    floatingBtn.title = 'Open Diagnostics';
+    floatingBtn.style.cssText = `
+        position: fixed;
+        bottom: 80px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, rgba(0, 255, 255, 0.2), rgba(0, 200, 255, 0.3));
+        border: 2px solid rgba(0, 255, 255, 0.5);
+        border-radius: 50%;
+        color: #00ffff;
+        font-size: 1.5rem;
+        cursor: pointer;
+        z-index: 9999;
+        box-shadow: 0 4px 20px rgba(0, 255, 255, 0.4);
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        backdrop-filter: blur(10px);
+    `;
+
+    floatingBtn.addEventListener('click', () => {
+        toggleDebugOverlay();
+    });
+
+    floatingBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        floatingBtn.style.transform = 'scale(0.9)';
+    });
+
+    floatingBtn.addEventListener('touchend', (e) => {
+        e.preventDefault();
+        floatingBtn.style.transform = 'scale(1)';
+        toggleDebugOverlay();
+    });
+
+    document.body.appendChild(floatingBtn);
+    console.log('✅ Floating debug button added (bottom-right corner)');
 }
 
 /**
