@@ -32,22 +32,25 @@
     display: none;
 }
 
-/* Canvas container adjustment */
+/* Canvas container adjustment - DYNAMIC via layout-polish.js */
 .canvas-container {
-    position: fixed;
+    position: fixed !important;
     top: 60px;
-    left: 0;
-    right: 0;
-    bottom: 52px; /* Space for collapsed bezel */
-    transition: bottom 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 52px; /* Default for collapsed - overridden by layout-polish.js */
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    background: #000;
 }
 
+/* These are overridden by layout-polish.js for dynamic sizing */
 .control-panel.collapsed ~ .canvas-container {
-    bottom: 52px;
+    bottom: 52px !important;
 }
 
 .control-panel:not(.collapsed) ~ .canvas-container {
-    bottom: 65vh; /* Space for expanded bezel */
+    /* Dynamic bottom calculated by layout-polish.js based on viewport */
 }
 
 /* Bezel Header/Tab Bar */
