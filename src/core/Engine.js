@@ -12,7 +12,14 @@ import { ExportManager } from '../export/ExportManager.js';
 // InteractionHandler removed - each system handles its own interactions
 import { StatusManager } from '../ui/StatusManager.js';
 
+/**
+ * Main system controller for the VIB34D Integrated Holographic Engine.
+ * This class combines 5-layer holographic rendering with 4D polytopal mathematics and 100 geometric variations.
+ */
 export class VIB34DIntegratedEngine {
+    /**
+     * Initializes the VIB34D Integrated Engine.
+     */
     constructor() {
         // Core system components
         this.visualizers = [];
@@ -48,7 +55,7 @@ export class VIB34DIntegratedEngine {
     }
     
     /**
-     * Initialize the complete VIB34D system
+     * Initializes the complete VIB34D system.
      */
     init() {
         console.log('🌌 Initializing VIB34D Integrated Holographic Engine...');
@@ -70,7 +77,7 @@ export class VIB34DIntegratedEngine {
     }
     
     /**
-     * Create the 5-layer holographic visualization system
+     * Creates the 5-layer holographic visualization system.
      */
     createVisualizers() {
         const layers = [
@@ -95,7 +102,7 @@ export class VIB34DIntegratedEngine {
     }
     
     /**
-     * Set up UI controls and event handlers
+     * Sets up UI controls and event handlers.
      */
     setupControls() {
         // Delegate to UI components
@@ -105,6 +112,9 @@ export class VIB34DIntegratedEngine {
         this.updateDisplayValues();
     }
     
+    /**
+     * Sets up the tab system.
+     */
     setupTabSystem() {
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -117,6 +127,9 @@ export class VIB34DIntegratedEngine {
         });
     }
     
+    /**
+     * Sets up the parameter controls.
+     */
     setupParameterControls() {
         const controls = [
             'variationSlider', 'rot4dXW', 'rot4dYW', 'rot4dZW', 'dimension',
@@ -131,6 +144,9 @@ export class VIB34DIntegratedEngine {
         });
     }
     
+    /**
+     * Sets up the geometry presets.
+     */
     setupGeometryPresets() {
         document.querySelectorAll('[data-geometry]').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -144,7 +160,7 @@ export class VIB34DIntegratedEngine {
     }
     
     /**
-     * Set up mouse/touch interactions
+     * Sets up mouse and touch interactions.
      */
     setupInteractions() {
         if (!this.useBuiltInReactivity) {
@@ -156,6 +172,9 @@ export class VIB34DIntegratedEngine {
         this.setup4DRotationReactivity();
     }
     
+    /**
+     * Sets up 4D rotation reactivity.
+     */
     setup4DRotationReactivity() {
         console.log('🔷 Setting up Faceted: 4D rotations + click flash + scroll density');
         
@@ -227,6 +246,11 @@ export class VIB34DIntegratedEngine {
         this.startColorFlashLoop();
     }
     
+    /**
+     * Updates the 4D rotation parameters based on mouse/touch position.
+     * @param {number} x - The x position of the mouse/touch.
+     * @param {number} y - The y position of the mouse/touch.
+     */
     update4DRotationParameters(x, y) {
         // Map mouse/touch position to 4D rotation ranges (-6.28 to 6.28)
         const rotationRange = 6.28 * 2; // Full range is 12.56
@@ -256,6 +280,9 @@ export class VIB34DIntegratedEngine {
         console.log(`🔷 Smooth 4D + Hue: XW=${rot4dXW.toFixed(2)}, ZW=${rot4dZW.toFixed(2)}, Hue=${Math.round(mouseHue)}`);
     }
     
+    /**
+     * Triggers a color flash effect.
+     */
     triggerColorFlash() {
         // DRAMATIC BUT FLUID CLICK EFFECT
         this.colorFlashIntensity = 1.0; // Start at full flash
@@ -267,6 +294,10 @@ export class VIB34DIntegratedEngine {
         console.log('💥 Faceted dramatic click: color flash + chaos + speed boost');
     }
     
+    /**
+     * Updates the scroll density based on the scroll delta.
+     * @param {number} deltaY - The scroll delta.
+     */
     updateScrollDensity(deltaY) {
         // ENHANCED SCROLL: More reactive with hue changes + density
         const scrollSpeed = 0.8; // More reactive
@@ -291,6 +322,9 @@ export class VIB34DIntegratedEngine {
         console.log(`🌀 Smooth scroll: Density=${Math.round(this.scrollDensity)}, Hue=${Math.round(this.scrollHue)}`);
     }
     
+    /**
+     * Starts the color flash animation loop.
+     */
     startColorFlashLoop() {
         const flashAnimation = () => {
             // ENHANCED DRAMATIC FLASH EFFECT (multiple parameters)
@@ -374,21 +408,21 @@ export class VIB34DIntegratedEngine {
     }
     
     /**
-     * Load custom variations from storage
+     * Loads custom variations from storage.
      */
     loadCustomVariations() {
         this.variationManager.loadCustomVariations();
     }
     
     /**
-     * Populate the variation grid UI
+     * Populates the variation grid UI.
      */
     populateVariationGrid() {
         this.variationManager.populateGrid();
     }
     
     /**
-     * Start the main render loop
+     * Starts the main render loop.
      */
     startRenderLoop() {
         if (window.mobileDebug) {
@@ -414,7 +448,7 @@ export class VIB34DIntegratedEngine {
     }
     
     /**
-     * Update all visualizers with current parameters
+     * Updates all visualizers with the current parameters.
      */
     updateVisualizers() {
         const params = this.parameterManager.getAllParameters();
@@ -437,7 +471,7 @@ export class VIB34DIntegratedEngine {
     }
     
     /**
-     * Update parameters from UI controls
+     * Updates parameters from UI controls.
      */
     updateFromControls() {
         this.parameterManager.updateFromControls();
@@ -445,14 +479,15 @@ export class VIB34DIntegratedEngine {
     }
     
     /**
-     * Update display values in UI
+     * Updates display values in the UI.
      */
     updateDisplayValues() {
         this.parameterManager.updateDisplayValues();
     }
     
     /**
-     * Navigate to specific variation
+     * Navigates to a specific variation.
+     * @param {number} index - The index of the variation to navigate to.
      */
     setVariation(index) {
         if (index >= 0 && index < this.totalVariations) {
@@ -472,23 +507,29 @@ export class VIB34DIntegratedEngine {
     }
     
     /**
-     * Navigation methods
+     * Navigates to the next variation.
      */
     nextVariation() {
         this.setVariation((this.currentVariation + 1) % this.totalVariations);
     }
     
+    /**
+     * Navigates to the previous variation.
+     */
     previousVariation() {
         this.setVariation((this.currentVariation - 1 + this.totalVariations) % this.totalVariations);
     }
     
+    /**
+     * Navigates to a random variation.
+     */
     randomVariation() {
         const newIndex = Math.floor(Math.random() * this.totalVariations);
         this.setVariation(newIndex);
     }
     
     /**
-     * Randomize all parameters
+     * Randomizes all parameters.
      */
     randomizeAll() {
         this.parameterManager.randomizeAll();
@@ -498,7 +539,7 @@ export class VIB34DIntegratedEngine {
     }
     
     /**
-     * Reset to default parameters
+     * Resets all parameters to their default values.
      */
     resetToDefaults() {
         this.parameterManager.resetToDefaults();
@@ -508,7 +549,7 @@ export class VIB34DIntegratedEngine {
     }
     
     /**
-     * Save current state as custom variation
+     * Saves the current state as a custom variation.
      */
     saveAsCustomVariation() {
         const customIndex = this.variationManager.saveCurrentAsCustom();
@@ -521,44 +562,57 @@ export class VIB34DIntegratedEngine {
     }
     
     /**
-     * Open gallery view
+     * Opens the gallery view.
      */
     openGalleryView() {
         this.gallerySystem.openGallery();
     }
     
     /**
-     * Export methods
+     * Exports the current state as a JSON file.
      */
     exportJSON() {
         this.exportManager.exportJSON();
     }
     
+    /**
+     * Exports the current state as a CSS file.
+     */
     exportCSS() {
         this.exportManager.exportCSS();
     }
     
+    /**
+     * Exports the current state as an HTML file.
+     */
     exportHTML() {
         this.exportManager.exportHTML();
     }
     
+    /**
+     * Exports the current state as a PNG file.
+     */
     exportPNG() {
         this.exportManager.exportPNG();
     }
     
     /**
-     * Import methods
+     * Imports a JSON file.
      */
     importJSON() {
         this.exportManager.importJSON();
     }
     
+    /**
+     * Imports a folder.
+     */
     importFolder() {
         this.exportManager.importFolder();
     }
     
     /**
-     * Set active state - required by CanvasManager
+     * Sets the active state of the engine.
+     * @param {boolean} active - Whether the engine should be active.
      */
     setActive(active) {
         console.log(`🔷 Faceted Engine setActive: ${active}`);
@@ -575,7 +629,10 @@ export class VIB34DIntegratedEngine {
     }
     
     /**
-     * Update mouse interaction state
+     * Updates the mouse interaction state.
+     * @param {number} x - The x position of the mouse.
+     * @param {number} y - The y position of the mouse.
+     * @param {number} intensity - The intensity of the interaction.
      */
     updateInteraction(x, y, intensity = 0.5) {
         this.mouseX = x;
@@ -591,19 +648,16 @@ export class VIB34DIntegratedEngine {
     }
     
     /**
-     * Trigger click interaction
+     * Triggers a click interaction.
+     * @param {number} intensity - The intensity of the click.
      */
     triggerClick(intensity = 1.0) {
         this.clickIntensity = intensity;
     }
     
     /**
-     * Update audio reactivity (for universal reactivity system)
-     */
-    // Audio reactivity now handled directly in visualizer render loops - no engine coordination needed
-    
-    /**
-     * Apply audio reactivity grid settings (similar to holographic system)
+     * Applies audio reactivity grid settings.
+     * @param {object} audioData - The audio data to apply.
      */
     applyAudioReactivityGrid(audioData) {
         const settings = this.audioReactivitySettings || window.audioReactivitySettings;
@@ -690,7 +744,8 @@ export class VIB34DIntegratedEngine {
     }
     
     /**
-     * Update click effects (for universal reactivity system)
+     * Updates the click effects.
+     * @param {number} intensity - The intensity of the click.
      */
     updateClick(intensity) {
         // Trigger click intensity on all visualizers
@@ -704,7 +759,8 @@ export class VIB34DIntegratedEngine {
     }
     
     /**
-     * Update scroll effects (for universal reactivity system)
+     * Updates the scroll effects.
+     * @param {number} velocity - The velocity of the scroll.
      */
     updateScroll(velocity) {
         this.visualizers.forEach(visualizer => {
@@ -723,7 +779,7 @@ export class VIB34DIntegratedEngine {
     }
     
     /**
-     * Clean up resources
+     * Cleans up resources.
      */
     destroy() {
         // Disconnect from universal reactivity

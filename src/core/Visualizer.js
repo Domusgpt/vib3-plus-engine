@@ -5,7 +5,17 @@
 
 import { GeometryLibrary } from '../geometry/GeometryLibrary.js';
 
+/**
+ * WebGL-based renderer for individual holographic layers.
+ */
 export class IntegratedHolographicVisualizer {
+    /**
+     * Initializes the Integrated Holographic Visualizer.
+     * @param {string} canvasId - The ID of the canvas element.
+     * @param {string} role - The role of the visualizer.
+     * @param {number} reactivity - The reactivity of the visualizer.
+     * @param {number} variant - The variant of the visualizer.
+     */
     constructor(canvasId, role, reactivity, variant) {
         this.canvas = document.getElementById(canvasId);
         this.role = role;
@@ -64,7 +74,9 @@ export class IntegratedHolographicVisualizer {
     }
     
     /**
-     * CRITICAL FIX: Ensure canvas is properly sized before creating WebGL context
+     * Ensures the canvas is properly sized before creating the WebGL context.
+     * @param {DOMRect} rect - The bounding rect of the canvas.
+     * @param {number} devicePixelRatio - The device pixel ratio.
      */
     async ensureCanvasSizedThenInitWebGL(rect, devicePixelRatio) {
         // If canvas has no dimensions, wait for layout or use viewport
@@ -113,7 +125,7 @@ export class IntegratedHolographicVisualizer {
     }
     
     /**
-     * Create WebGL context after canvas is properly sized
+     * Creates the WebGL context after the canvas is properly sized.
      */
     createWebGLContext() {
         // CRITICAL FIX: Check if context already exists from CanvasManager
@@ -149,7 +161,7 @@ export class IntegratedHolographicVisualizer {
     }
 
     /**
-     * Initialize WebGL rendering pipeline
+     * Initializes the WebGL rendering pipeline.
      */
     init() {
         this.initShaders();
@@ -158,7 +170,7 @@ export class IntegratedHolographicVisualizer {
     }
     
     /**
-     * Initialize shaders with 4D mathematics
+     * Initializes the shaders with 4D mathematics.
      */
     initShaders() {
         const vertexShaderSource = `attribute vec2 a_position;
@@ -464,7 +476,10 @@ void main() {
     }
     
     /**
-     * Create WebGL program from shaders
+     * Creates a WebGL program from vertex and fragment shaders.
+     * @param {string} vertexSource - The vertex shader source code.
+     * @param {string} fragmentSource - The fragment shader source code.
+     * @returns {WebGLProgram} The created WebGL program.
      */
     createProgram(vertexSource, fragmentSource) {
         const vertexShader = this.createShader(this.gl.VERTEX_SHADER, vertexSource);
@@ -488,7 +503,10 @@ void main() {
     }
     
     /**
-     * Create individual shader
+     * Creates an individual shader.
+     * @param {number} type - The type of the shader.
+     * @param {string} source - The source code of the shader.
+     * @returns {WebGLShader} The created shader.
      */
     createShader(type, source) {
         // CRITICAL FIX: Check WebGL context state before shader operations
@@ -537,7 +555,7 @@ void main() {
     }
     
     /**
-     * Initialize vertex buffers
+     * Initializes the vertex buffers.
      */
     initBuffers() {
         const positions = new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]);
@@ -552,7 +570,7 @@ void main() {
     }
     
     /**
-     * Resize canvas and viewport
+     * Resizes the canvas and viewport.
      */
     resize() {
         // Mobile-optimized canvas sizing
@@ -569,7 +587,7 @@ void main() {
     }
     
     /**
-     * Show user-friendly WebGL error message
+     * Shows a user-friendly WebGL error message.
      */
     showWebGLError() {
         if (!this.canvas) return;
@@ -636,14 +654,18 @@ void main() {
     }
     
     /**
-     * Update visualization parameters
+     * Updates the visualization parameters.
+     * @param {object} params - The new parameters.
      */
     updateParameters(params) {
         this.params = { ...this.params, ...params };
     }
     
     /**
-     * Update mouse interaction state
+     * Updates the mouse interaction state.
+     * @param {number} x - The x position of the mouse.
+     * @param {number} y - The y position of the mouse.
+     * @param {number} intensity - The intensity of the interaction.
      */
     updateInteraction(x, y, intensity) {
         // Check if interactions are enabled globally
@@ -661,7 +683,7 @@ void main() {
     }
     
     /**
-     * Render frame
+     * Renders a frame.
      */
     render() {
         if (!this.program) {
@@ -754,7 +776,8 @@ void main() {
     }
     
     /**
-     * CRITICAL FIX: Reinitialize WebGL program after context recreation
+     * Reinitializes the WebGL program after the context has been recreated.
+     * @returns {boolean} True if the context was reinitialized successfully, false otherwise.
      */
     reinitializeContext() {
         console.log(`🔄 Reinitializing WebGL context for ${this.canvas?.id}`);
@@ -791,11 +814,9 @@ void main() {
             return false;
         }
     }
-
-    // Audio reactivity now handled directly in render() loop - no complex methods needed
     
     /**
-     * Clean up WebGL resources
+     * Cleans up WebGL resources.
      */
     destroy() {
         if (this.gl && this.program) {

@@ -9,8 +9,9 @@ let audioEnabled = window.audioEnabled || false;
 let interactivityEnabled = false;
 
 /**
- * Main parameter update function - CRITICAL for all visualizers
- * Routes parameters to appropriate engine based on current system
+ * Updates a parameter in the current visualization system.
+ * @param {string} param - The name of the parameter to update.
+ * @param {any} value - The new value for the parameter.
  */
 window.updateParameter = function(param, value) {
     // CRITICAL: Store user's parameter choice for persistence
@@ -99,7 +100,7 @@ window.updateParameter = function(param, value) {
 };
 
 /**
- * Randomize all parameters except hue and geometry
+ * Randomizes all parameters except for hue and geometry.
  */
 window.randomizeAll = function() {
     // Randomize ONLY parameters (NO hue, NO geometry)
@@ -107,7 +108,7 @@ window.randomizeAll = function() {
 };
 
 /**
- * Full randomization: parameters + geometry + hue
+ * Randomizes all parameters, including geometry and hue.
  */
 window.randomizeEverything = function() {
     // Full randomization: parameters + geometry + hue
@@ -116,7 +117,7 @@ window.randomizeEverything = function() {
 };
 
 /**
- * Randomize parameters excluding hue
+ * Randomizes all parameters except for hue.
  */
 function randomizeParameters() {
     // Randomize all parameters EXCEPT hue and geometry
@@ -137,7 +138,7 @@ function randomizeParameters() {
 }
 
 /**
- * Randomize geometry selection and hue value
+ * Randomizes the geometry and hue.
  */
 function randomizeGeometryAndHue() {
     // Randomize geometry selection
@@ -161,7 +162,7 @@ function randomizeGeometryAndHue() {
 }
 
 /**
- * Reset all parameters to their default values
+ * Resets all parameters to their default values.
  */
 window.resetAll = function() {
     // Reset all sliders to defaults
@@ -195,7 +196,7 @@ window.resetAll = function() {
 };
 
 /**
- * Gallery Functions
+ * Opens the gallery.
  */
 window.openGallery = function() {
     console.log('🖼️ Navigating to gallery...');
@@ -215,7 +216,7 @@ window.openGallery = function() {
 };
 
 /**
- * Interactivity Toggle - Enable/disable mouse and touch interactions
+ * Toggles mouse and touch interactions.
  */
 window.toggleInteractivity = function() {
     interactivityEnabled = !interactivityEnabled;
@@ -242,7 +243,10 @@ window.toggleInteractivity = function() {
 };
 
 /**
- * 3×3 Modular Reactivity Grid System (accessible from HTML)
+ * Toggles system reactivity for a given system, interaction, and enabled state.
+ * @param {string} system - The system to toggle reactivity for.
+ * @param {string} interaction - The interaction to toggle.
+ * @param {boolean} enabled - Whether to enable or disable the interaction.
  */
 window.toggleSystemReactivity = function(system, interaction, enabled) {
     if (!window.reactivityManager) {
@@ -334,7 +338,10 @@ window.toggleSystemReactivity = function(system, interaction, enabled) {
 };
 
 /**
- * 3×3 Audio Reactivity Grid System (accessible from HTML)
+ * Toggles audio reactivity for a given sensitivity, visual mode, and enabled state.
+ * @param {string} sensitivity - The sensitivity level.
+ * @param {string} visualMode - The visual mode to toggle.
+ * @param {boolean} enabled - Whether to enable or disable the audio reactivity.
  */
 window.toggleAudioReactivity = function(sensitivity, visualMode, enabled) {
     console.log(`🎵 ${sensitivity.toUpperCase()} ${visualMode.toUpperCase()}: ${enabled ? 'ON' : 'OFF'}`);
@@ -393,7 +400,8 @@ window.toggleAudioReactivity = function(sensitivity, visualMode, enabled) {
 };
 
 /**
- * Helper function for audio cell clicks (makes the checkboxes more clickable)
+ * Toggles the audio cell checkbox and calls the main toggle function.
+ * @param {string} cellId - The ID of the cell to toggle.
  */
 window.toggleAudioCell = function(cellId) {
     const checkbox = document.getElementById(cellId);
@@ -413,7 +421,9 @@ window.toggleAudioCell = function(cellId) {
 };
 
 /**
- * Helper function to update UI sliders when LLM sets parameters
+ * Updates the UI slider for a given parameter.
+ * @param {string} param - The name of the parameter to update.
+ * @param {any} value - The new value for the parameter.
  */
 function updateUIParameter(param, value) {
     const slider = document.getElementById(param);
@@ -426,7 +436,7 @@ function updateUIParameter(param, value) {
 }
 
 /**
- * Show interactivity status overlay
+ * Shows the interactivity status overlay.
  */
 function showInteractivityStatus() {
     // Create floating overlay for interactivity status
@@ -469,7 +479,7 @@ function showInteractivityStatus() {
 }
 
 /**
- * Show audio reactivity status overlay
+ * Shows the audio reactivity status overlay.
  */
 function showAudioReactivityStatus() {
     const settings = window.audioReactivitySettings;
@@ -521,7 +531,9 @@ function showAudioReactivityStatus() {
     }, 4000);
 }
 
-// Legacy function name support
+/**
+ * Legacy function for showing the interactivity overlay.
+ */
 function showInteractivityOverlay() {
     showInteractivityStatus();
 }
@@ -583,7 +595,8 @@ window.addEventListener('message', (event) => {
 });
 
 /**
- * Setup geometry buttons for the current system
+ * Sets up the geometry buttons for the current system.
+ * @param {string} system - The name of the system to set up the geometry buttons for.
  */
 window.setupGeometry = function(system) {
     const grid = document.getElementById('geometryGrid');
@@ -603,7 +616,7 @@ window.setupGeometry = function(system) {
 };
 
 /**
- * Mobile panel toggle function
+ * Toggles the mobile panel.
  */
 window.toggleMobilePanel = function() {
     const controlPanel = document.getElementById('controlPanel');

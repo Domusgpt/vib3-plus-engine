@@ -8,10 +8,13 @@
 window.audioEnabled = false; // Global audio flag (will auto-enable on interaction)
 
 /**
- * Simple Audio Engine - Mobile-safe and actually works
- * Provides real-time audio analysis for all visualization systems
+ * Provides real-time audio analysis for all visualization systems.
+ * This class is mobile-safe and integrates with the global window object.
  */
 export class SimpleAudioEngine {
+    /**
+     * Initializes the audio engine with default values.
+     */
     constructor() {
         this.context = null;
         this.analyser = null;
@@ -29,6 +32,10 @@ export class SimpleAudioEngine {
         console.log('🎵 Audio Engine: Initialized with default values');
     }
     
+    /**
+     * Initializes the audio context and starts processing audio data.
+     * @returns {Promise<boolean>} A promise that resolves to true if audio is successfully initialized, and false otherwise.
+     */
     async init() {
         if (this.isActive) return true;
         
@@ -66,6 +73,9 @@ export class SimpleAudioEngine {
         }
     }
     
+    /**
+     * Starts processing audio data and calculating audio reactive values.
+     */
     startProcessing() {
         const process = () => {
             if (!this.isActive || !this.analyser) {
@@ -108,21 +118,23 @@ export class SimpleAudioEngine {
     }
     
     /**
-     * Check if audio is currently active and processing
+     * Checks if audio is currently active and processing.
+     * @returns {boolean} True if audio is active, false otherwise.
      */
     isAudioActive() {
         return this.isActive && window.audioEnabled;
     }
     
     /**
-     * Get current audio reactive values
+     * Gets the current audio reactive values.
+     * @returns {object} An object containing the current bass, mid, high, and energy values.
      */
     getAudioLevels() {
         return window.audioReactive;
     }
     
     /**
-     * Stop audio processing and clean up resources
+     * Stops audio processing and cleans up resources.
      */
     stop() {
         this.isActive = false;
@@ -138,8 +150,8 @@ export class SimpleAudioEngine {
 }
 
 /**
- * Audio Toggle Function - Global function for UI integration
- * Toggles audio reactivity and updates UI state
+ * Sets up the global audio toggle function.
+ * This function is responsible for toggling audio reactivity and updating the UI state.
  */
 export function setupAudioToggle() {
     window.toggleAudio = function() {
