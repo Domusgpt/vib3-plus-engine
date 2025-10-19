@@ -26,51 +26,108 @@ function initializeLayoutPolish() {
 }
 
 /**
- * Fix icon display in system buttons - Angular RGB-split style
+ * Fix icon display - Angular RGB-split style for ALL icons
  */
 function fixIconDisplay() {
     console.log('🔧 Setting up angular RGB-split icons...');
 
     // Wait for DOM to be ready
     setTimeout(() => {
+        // System buttons - Angular geometric shapes
         const systemButtons = document.querySelectorAll('.system-btn');
-
-        systemButtons.forEach((btn, index) => {
+        systemButtons.forEach((btn) => {
             const iconSpan = btn.querySelector('.system-icon');
             const systemName = btn.dataset.system;
 
             if (iconSpan) {
-                // Angular geometric shapes (more angular than emojis)
+                // Better angular geometric shapes for each system
                 const angularIcons = {
-                    'faceted': '◆',    // Diamond
-                    'quantum': '⬢',    // Hexagon
-                    'holographic': '⬣', // Hexagon outline
-                    'polychora': '⬡'   // Hexagon bold
+                    'faceted': '◆',    // Diamond - faceted crystal structure
+                    'quantum': '◉',    // Double ring - quantum orbital/wave
+                    'holographic': '⬡', // Bold hexagon - holographic cell
+                    'polychora': '■'   // Square - 4D polytope projection
                 };
 
-                // Set icon content and data attribute for CSS
-                iconSpan.textContent = angularIcons[systemName] || '◆';
-                iconSpan.setAttribute('data-icon', angularIcons[systemName] || '◆');
+                const icon = angularIcons[systemName] || '◆';
+                iconSpan.textContent = icon;
+                iconSpan.setAttribute('data-icon', icon);
                 iconSpan.setAttribute('data-system', systemName);
-
-                // Force visibility and positioning
                 iconSpan.style.display = 'inline-flex';
                 iconSpan.style.position = 'relative';
                 iconSpan.style.zIndex = '10001';
-
-                console.log(`✅ Set RGB-split icon for ${systemName}`);
             }
 
             // Add click convergence effect
             btn.addEventListener('click', () => {
                 btn.classList.add('glitching');
-                setTimeout(() => {
-                    btn.classList.remove('glitching');
-                }, 400);
+                setTimeout(() => btn.classList.remove('glitching'), 400);
             });
         });
 
-        console.log('✅ Angular RGB-split icons initialized');
+        // Bezel collapse button
+        const collapseBtn = document.querySelector('.bezel-collapse-btn');
+        if (collapseBtn) {
+            const updateCollapseIcon = () => {
+                const isCollapsed = document.getElementById('controlPanel')?.classList.contains('collapsed');
+                const icon = isCollapsed ? '▲' : '▼';
+                collapseBtn.textContent = icon;
+                collapseBtn.setAttribute('data-icon', icon);
+            };
+            updateCollapseIcon();
+            collapseBtn.addEventListener('click', () => {
+                setTimeout(updateCollapseIcon, 100);
+            });
+        }
+
+        // Action buttons
+        const actionIcons = {
+            'save-btn': '💾',
+            'gallery': '▦',   // Grid
+            'audio': '♪',     // Note
+            'tilt': '⟲',      // Rotate
+            'ai': '◉',        // Neural
+            'interactivity': '⚡' // Lightning
+        };
+
+        document.querySelectorAll('.action-btn').forEach(btn => {
+            const title = btn.getAttribute('title')?.toLowerCase() || '';
+            let icon = '●';
+
+            if (title.includes('gallery')) icon = '▦';
+            else if (title.includes('audio')) icon = '♪';
+            else if (title.includes('tilt')) icon = '⟲';
+            else if (title.includes('ai')) icon = '◉';
+            else if (title.includes('interactivity')) icon = '⚡';
+
+            btn.textContent = icon;
+            btn.setAttribute('data-icon', icon);
+        });
+
+        // Save button
+        const saveBtn = document.querySelector('.save-btn');
+        if (saveBtn) {
+            saveBtn.setAttribute('data-icon', '💾');
+        }
+
+        // Tab icons
+        const tabIcons = {
+            'controls': '⚙',
+            'color': '◐',
+            'geometry': '▲',
+            'reactivity': '⚡',
+            'export': '💾'
+        };
+
+        document.querySelectorAll('.bezel-tab').forEach(tab => {
+            const tabName = tab.dataset.tab;
+            const iconSpan = tab.querySelector('.tab-icon');
+            if (iconSpan && tabIcons[tabName]) {
+                iconSpan.textContent = tabIcons[tabName];
+                iconSpan.setAttribute('data-icon', tabIcons[tabName]);
+            }
+        });
+
+        console.log('✅ All RGB-split icons initialized');
     }, 500);
 }
 

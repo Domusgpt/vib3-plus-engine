@@ -124,29 +124,29 @@
     }
 }
 
-/* Angular Shape Styles - Use geometric Unicode */
+/* Angular Shape Styles - Better geometric shapes */
 .system-icon[data-system="faceted"]::before,
 .system-icon[data-system="faceted"]::after,
 .system-icon[data-system="faceted"] {
-    content: '◆'; /* Diamond */
+    content: '◆'; /* Diamond - faceted crystal structure */
 }
 
 .system-icon[data-system="quantum"]::before,
 .system-icon[data-system="quantum"]::after,
 .system-icon[data-system="quantum"] {
-    content: '⬢'; /* Hexagon */
+    content: '◉'; /* Double ring - quantum orbital/wave */
 }
 
 .system-icon[data-system="holographic"]::before,
 .system-icon[data-system="holographic"]::after,
 .system-icon[data-system="holographic"] {
-    content: '⬣'; /* Hexagon outline */
+    content: '⬡'; /* Bold hexagon - holographic cell */
 }
 
 .system-icon[data-system="polychora"]::before,
 .system-icon[data-system="polychora"]::after,
 .system-icon[data-system="polychora"] {
-    content: '⬡'; /* Hexagon bold */
+    content: '■'; /* Square - 4D cube projection */
 }
 
 /* Glow Intensity States */
@@ -211,4 +211,115 @@
     .system-icon::after {
         transform: translate(2.5px, 1.5px);
     }
+}
+
+/* ========================================
+   APPLY RGB-SPLIT TO ALL OTHER ICONS
+   ======================================== */
+
+/* Action Buttons */
+.action-btn,
+.save-btn,
+.bezel-collapse-btn,
+.bezel-tab,
+.tab-icon {
+    position: relative !important;
+    overflow: visible !important;
+}
+
+.action-btn::before,
+.action-btn::after,
+.save-btn::before,
+.save-btn::after,
+.bezel-collapse-btn::before,
+.bezel-collapse-btn::after {
+    content: attr(data-icon);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) translate(-1.5px, -0.5px);
+    font-size: inherit;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    mix-blend-mode: screen;
+}
+
+.action-btn::before,
+.save-btn::before,
+.bezel-collapse-btn::before {
+    color: rgba(255, 0, 0, 0.7);
+}
+
+.action-btn::after,
+.save-btn::after,
+.bezel-collapse-btn::after {
+    transform: translate(-50%, -50%) translate(1.5px, 0.5px);
+    color: rgba(0, 100, 255, 0.7);
+}
+
+.action-btn,
+.save-btn,
+.bezel-collapse-btn {
+    color: rgba(0, 255, 100, 0.9);
+    filter: drop-shadow(0 0 6px currentColor);
+}
+
+/* Bezel Collapse Button Shapes */
+.bezel-collapse-btn[data-icon="▼"]::before,
+.bezel-collapse-btn[data-icon="▼"]::after {
+    content: '▼';
+}
+
+.bezel-collapse-btn[data-icon="▲"]::before,
+.bezel-collapse-btn[data-icon="▲"]::after {
+    content: '▲';
+}
+
+/* Tab Icons */
+.tab-icon {
+    position: relative !important;
+    display: inline-flex !important;
+    filter: drop-shadow(0 0 4px currentColor);
+}
+
+.tab-icon::before,
+.tab-icon::after {
+    content: attr(data-icon);
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    mix-blend-mode: screen;
+}
+
+.tab-icon::before {
+    color: rgba(255, 0, 0, 0.6);
+    transform: translate(-1px, -0.5px);
+}
+
+.tab-icon::after {
+    color: rgba(0, 100, 255, 0.6);
+    transform: translate(1px, 0.5px);
+}
+
+.tab-icon {
+    color: rgba(0, 255, 255, 0.9);
+}
+
+/* Bezel tab active state */
+.bezel-tab.active .tab-icon::before,
+.bezel-tab.active .tab-icon::after {
+    transform: translate(0, 0) !important;
+    animation: channelConverge 0.4s ease;
+}
+
+.bezel-tab.active .tab-icon {
+    filter:
+        drop-shadow(0 0 8px currentColor)
+        drop-shadow(0 0 16px currentColor);
 }
