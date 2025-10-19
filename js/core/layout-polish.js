@@ -26,10 +26,10 @@ function initializeLayoutPolish() {
 }
 
 /**
- * Fix icon display in system buttons
+ * Fix icon display in system buttons - Angular RGB-split style
  */
 function fixIconDisplay() {
-    console.log('🔧 Checking icon display...');
+    console.log('🔧 Setting up angular RGB-split icons...');
 
     // Wait for DOM to be ready
     setTimeout(() => {
@@ -37,33 +37,40 @@ function fixIconDisplay() {
 
         systemButtons.forEach((btn, index) => {
             const iconSpan = btn.querySelector('.system-icon');
+            const systemName = btn.dataset.system;
 
             if (iconSpan) {
-                // Check if icon is empty
-                const hasContent = iconSpan.textContent.trim().length > 0 ||
-                                 iconSpan.querySelector('svg') !== null;
+                // Angular geometric shapes (more angular than emojis)
+                const angularIcons = {
+                    'faceted': '◆',    // Diamond
+                    'quantum': '⬢',    // Hexagon
+                    'holographic': '⬣', // Hexagon outline
+                    'polychora': '⬡'   // Hexagon bold
+                };
 
-                if (!hasContent) {
-                    // Add fallback emoji based on button data-system
-                    const systemName = btn.dataset.system;
-                    const fallbackEmojis = {
-                        'faceted': '🔷',
-                        'quantum': '🌌',
-                        'holographic': '✨',
-                        'polychora': '🔮'
-                    };
+                // Set icon content and data attribute for CSS
+                iconSpan.textContent = angularIcons[systemName] || '◆';
+                iconSpan.setAttribute('data-icon', angularIcons[systemName] || '◆');
+                iconSpan.setAttribute('data-system', systemName);
 
-                    iconSpan.textContent = fallbackEmojis[systemName] || '●';
-                    console.log(`✅ Added fallback emoji for ${systemName}`);
-                }
-
-                // Ensure icon is visible
+                // Force visibility and positioning
                 iconSpan.style.display = 'inline-flex';
-                iconSpan.style.fontSize = '1.5rem';
+                iconSpan.style.position = 'relative';
+                iconSpan.style.zIndex = '10001';
+
+                console.log(`✅ Set RGB-split icon for ${systemName}`);
             }
+
+            // Add click convergence effect
+            btn.addEventListener('click', () => {
+                btn.classList.add('glitching');
+                setTimeout(() => {
+                    btn.classList.remove('glitching');
+                }, 400);
+            });
         });
 
-        console.log('✅ Icon display checked');
+        console.log('✅ Angular RGB-split icons initialized');
     }, 500);
 }
 
