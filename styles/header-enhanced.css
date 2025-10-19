@@ -13,10 +13,15 @@
     align-items: center;
     justify-content: space-between;
     padding: 0 20px;
-    z-index: 1000;
+    z-index: 10000 !important; /* FORCE above canvas */
     backdrop-filter: blur(20px);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
     transition: all 0.3s ease;
+}
+
+/* Ensure all header children stay on top */
+.top-bar * {
+    z-index: inherit !important;
 }
 
 /* Landscape: Hide header for projection mode */
