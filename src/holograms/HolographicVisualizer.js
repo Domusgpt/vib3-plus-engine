@@ -257,7 +257,73 @@ export class HolographicVisualizer {
                 float w = 2.5 / (2.5 + p.w);
                 return vec3(p.x * w, p.y * w, p.z * w);
             }
-            
+
+            // ========================================
+            // POLYTOPE CORE WARP FUNCTIONS (24 Geometries)
+            // ========================================
+            vec3 warpHypersphereCore(vec3 p, int geometryIndex, vec2 mouseDelta) {
+                float radius = length(p);
+                float morphBlend = clamp(u_morph * 0.6 + 0.3, 0.0, 2.0);
+                float w = sin(radius * (1.3 + float(geometryIndex) * 0.12) + u_time * 0.0008 * u_speed);
+                w *= (0.4 + morphBlend * 0.45);
+
+                vec4 p4d = vec4(p * (1.0 + morphBlend * 0.2), w);
+                p4d = rotateXY(u_rot4dXY) * p4d;
+                p4d = rotateXZ(u_rot4dXZ) * p4d;
+                p4d = rotateYZ(u_rot4dYZ) * p4d;
+                p4d = rotateXW(u_rot4dXW) * p4d;
+                p4d = rotateYW(u_rot4dYW) * p4d;
+                p4d = rotateZW(u_rot4dZW) * p4d;
+
+                vec3 projected = project4Dto3D(p4d);
+                return mix(p, projected, clamp(0.45 + morphBlend * 0.35, 0.0, 1.0));
+            }
+
+            vec3 warpHypertetraCore(vec3 p, int geometryIndex, vec2 mouseDelta) {
+                vec3 c1 = normalize(vec3(1.0, 1.0, 1.0));
+                vec3 c2 = normalize(vec3(-1.0, -1.0, 1.0));
+                vec3 c3 = normalize(vec3(-1.0, 1.0, -1.0));
+                vec3 c4 = normalize(vec3(1.0, -1.0, -1.0));
+
+                float morphBlend = clamp(u_morph * 0.8 + 0.2, 0.0, 2.0);
+                float basisMix = dot(p, c1) * 0.14 + dot(p, c2) * 0.1 + dot(p, c3) * 0.08;
+                float w = sin(basisMix * 5.5 + u_time * 0.0009 * u_speed);
+                w *= cos(dot(p, c4) * 4.2 - u_time * 0.0007 * u_speed);
+                w *= (0.5 + morphBlend * 0.4);
+
+                vec3 offset = vec3(dot(p, c1), dot(p, c2), dot(p, c3)) * 0.1 * morphBlend;
+                vec4 p4d = vec4(p + offset, w);
+                p4d = rotateXY(u_rot4dXY) * p4d;
+                p4d = rotateXZ(u_rot4dXZ) * p4d;
+                p4d = rotateYZ(u_rot4dYZ) * p4d;
+                p4d = rotateXW(u_rot4dXW) * p4d;
+                p4d = rotateYW(u_rot4dYW) * p4d;
+                p4d = rotateZW(u_rot4dZW) * p4d;
+
+                vec3 projected = project4Dto3D(p4d);
+
+                float planeInfluence = min(min(abs(dot(p, c1)), abs(dot(p, c2))), min(abs(dot(p, c3)), abs(dot(p, c4))));
+                vec3 blended = mix(p, projected, clamp(0.45 + morphBlend * 0.35, 0.0, 1.0));
+                return mix(blended, blended * (1.0 - planeInfluence * 0.55), 0.2 + morphBlend * 0.2);
+            }
+
+            vec3 applyCoreWarp(vec3 p, float geometryType, vec2 mouseDelta) {
+                float totalBase = 8.0;
+                float coreFloat = floor(geometryType / totalBase);
+                int coreIndex = int(clamp(coreFloat, 0.0, 2.0));
+                float baseGeomFloat = geometryType - floor(geometryType / totalBase) * totalBase;
+                int geometryIndex = int(clamp(floor(baseGeomFloat + 0.5), 0.0, totalBase - 1.0));
+
+                if (coreIndex == 1) {
+                    return warpHypersphereCore(p, geometryIndex, mouseDelta);
+                }
+                if (coreIndex == 2) {
+                    return warpHypertetraCore(p, geometryIndex, mouseDelta);
+                }
+                return p;
+            }
+            // ========================================
+
             // Enhanced VIB3 Geometry Library - Higher Fidelity
             float tetrahedronLattice(vec3 p, float gridSize) {
                 vec3 q = fract(p * gridSize) - 0.5;
@@ -368,20 +434,24 @@ export class HolographicVisualizer {
             }
             
             float getDynamicGeometry(vec3 p, float gridSize, float geometryType) {
-                // WebGL 1.0 compatible modulus replacement
+                // Apply polytope core warp transformation (24-geometry system)
+                vec3 warped = applyCoreWarp(p, geometryType, vec2(0.0, 0.0));
+
+                // WebGL 1.0 compatible modulus replacement - decode base geometry
                 float baseGeomFloat = geometryType - floor(geometryType / 8.0) * 8.0;
                 int baseGeom = int(baseGeomFloat);
                 float variation = floor(geometryType / 8.0) / 4.0;
                 float variedGridSize = gridSize * (0.5 + variation * 1.5);
-                
-                if (baseGeom == 0) return tetrahedronLattice(p, variedGridSize);
-                else if (baseGeom == 1) return hypercubeLattice(p, variedGridSize);
-                else if (baseGeom == 2) return sphereLattice(p, variedGridSize);
-                else if (baseGeom == 3) return torusLattice(p, variedGridSize);
-                else if (baseGeom == 4) return kleinLattice(p, variedGridSize);
-                else if (baseGeom == 5) return fractalLattice(p, variedGridSize);
-                else if (baseGeom == 6) return waveLattice(p, variedGridSize);
-                else return crystalLattice(p, variedGridSize);
+
+                // Call lattice functions with warped point (enables 24 geometry variants)
+                if (baseGeom == 0) return tetrahedronLattice(warped, variedGridSize);
+                else if (baseGeom == 1) return hypercubeLattice(warped, variedGridSize);
+                else if (baseGeom == 2) return sphereLattice(warped, variedGridSize);
+                else if (baseGeom == 3) return torusLattice(warped, variedGridSize);
+                else if (baseGeom == 4) return kleinLattice(warped, variedGridSize);
+                else if (baseGeom == 5) return fractalLattice(warped, variedGridSize);
+                else if (baseGeom == 6) return waveLattice(warped, variedGridSize);
+                else return crystalLattice(warped, variedGridSize);
             }
             
             vec3 hsv2rgb(vec3 c) {

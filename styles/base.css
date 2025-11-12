@@ -14,13 +14,40 @@ body {
     position: relative;
 }
 
-/* Canvas container - main visualization area */
+/* Projection Mode: Hide all UI in landscape */
+body.projection-mode .top-bar,
+body.projection-mode .control-panel,
+body.projection-mode #floating-debug-btn {
+    transform: translateY(200%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Canvas container - FULL SCREEN (UI overlays on top) */
 .canvas-container {
     position: fixed;
-    top: 50px;
+    top: 0;
     left: 0;
-    right: 300px;
+    right: 0;
     bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #000;
+    z-index: 1 !important;
+}
+
+/* Ensure canvas layers stay BELOW UI */
+.canvas-container * {
+    position: relative;
+    z-index: auto !important;
+    max-height: 100vh;
+}
+
+/* Canvas elements must not exceed viewport */
+.holographic-layers,
+.visualization-canvas,
+canvas {
+    z-index: auto !important;
 }
 
 .visualization-canvas {

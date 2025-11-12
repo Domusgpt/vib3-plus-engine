@@ -3,20 +3,32 @@
 @media (max-width: 768px) {
     /* Main layout adjustments for mobile */
     .control-panel {
-        width: 100vw;
-        height: 40vh;
-        top: auto;
-        bottom: 0;
-        right: 0;
-        left: 0;
-        border-left: none;
-        border-top: 2px solid #00ffff;
+        width: 100vw !important;
+        height: auto !important;
+        max-height: 60vh !important;
+        top: auto !important;
+        bottom: 0 !important;
+        right: 0 !important;
+        left: 0 !important;
+        border-left: none !important;
+        border-top: 2px solid #00ffff !important;
     }
-    
+
+    .control-panel.collapsed {
+        max-height: 52px !important;
+        min-height: 52px !important;
+    }
+
     .canvas-container {
-        right: 0;
-        bottom: 60px;
-        top: 0;
+        right: 0 !important;
+        left: 0 !important;
+        /* Dynamic bottom set by layout-polish.js */
+    }
+
+    /* Ensure top bar doesn't grow too tall */
+    .top-bar {
+        max-height: 100px !important;
+        flex-wrap: wrap;
     }
     
     /* Header adjustments */

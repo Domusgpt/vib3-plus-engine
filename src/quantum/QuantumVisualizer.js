@@ -299,6 +299,72 @@ vec3 project4Dto3D(vec4 p) {
     return vec3(p.x * w, p.y * w, p.z * w);
 }
 
+// ========================================
+// POLYTOPE CORE WARP FUNCTIONS (24 Geometries)
+// ========================================
+vec3 warpHypersphereCore(vec3 p, int geometryIndex, vec2 mouseDelta) {
+    float radius = length(p);
+    float morphBlend = clamp(u_morphFactor * 0.6 + (u_dimension - 3.0) * 0.25, 0.0, 2.0);
+    float w = sin(radius * (1.3 + float(geometryIndex) * 0.12) + u_time * 0.0008 * u_speed);
+    w *= (0.4 + morphBlend * 0.45);
+
+    vec4 p4d = vec4(p * (1.0 + morphBlend * 0.2), w);
+    p4d = rotateXY(u_rot4dXY) * p4d;
+    p4d = rotateXZ(u_rot4dXZ) * p4d;
+    p4d = rotateYZ(u_rot4dYZ) * p4d;
+    p4d = rotateXW(u_rot4dXW) * p4d;
+    p4d = rotateYW(u_rot4dYW) * p4d;
+    p4d = rotateZW(u_rot4dZW) * p4d;
+
+    vec3 projected = project4Dto3D(p4d);
+    return mix(p, projected, clamp(0.45 + morphBlend * 0.35, 0.0, 1.0));
+}
+
+vec3 warpHypertetraCore(vec3 p, int geometryIndex, vec2 mouseDelta) {
+    vec3 c1 = normalize(vec3(1.0, 1.0, 1.0));
+    vec3 c2 = normalize(vec3(-1.0, -1.0, 1.0));
+    vec3 c3 = normalize(vec3(-1.0, 1.0, -1.0));
+    vec3 c4 = normalize(vec3(1.0, -1.0, -1.0));
+
+    float morphBlend = clamp(u_morphFactor * 0.8 + (u_dimension - 3.0) * 0.2, 0.0, 2.0);
+    float basisMix = dot(p, c1) * 0.14 + dot(p, c2) * 0.1 + dot(p, c3) * 0.08;
+    float w = sin(basisMix * 5.5 + u_time * 0.0009 * u_speed);
+    w *= cos(dot(p, c4) * 4.2 - u_time * 0.0007 * u_speed);
+    w *= (0.5 + morphBlend * 0.4);
+
+    vec3 offset = vec3(dot(p, c1), dot(p, c2), dot(p, c3)) * 0.1 * morphBlend;
+    vec4 p4d = vec4(p + offset, w);
+    p4d = rotateXY(u_rot4dXY) * p4d;
+    p4d = rotateXZ(u_rot4dXZ) * p4d;
+    p4d = rotateYZ(u_rot4dYZ) * p4d;
+    p4d = rotateXW(u_rot4dXW) * p4d;
+    p4d = rotateYW(u_rot4dYW) * p4d;
+    p4d = rotateZW(u_rot4dZW) * p4d;
+
+    vec3 projected = project4Dto3D(p4d);
+
+    float planeInfluence = min(min(abs(dot(p, c1)), abs(dot(p, c2))), min(abs(dot(p, c3)), abs(dot(p, c4))));
+    vec3 blended = mix(p, projected, clamp(0.45 + morphBlend * 0.35, 0.0, 1.0));
+    return mix(blended, blended * (1.0 - planeInfluence * 0.55), 0.2 + morphBlend * 0.2);
+}
+
+vec3 applyCoreWarp(vec3 p, float geometryType, vec2 mouseDelta) {
+    float totalBase = 8.0;
+    float coreFloat = floor(geometryType / totalBase);
+    int coreIndex = int(clamp(coreFloat, 0.0, 2.0));
+    float baseGeomFloat = mod(geometryType, totalBase);
+    int geometryIndex = int(clamp(floor(baseGeomFloat + 0.5), 0.0, totalBase - 1.0));
+
+    if (coreIndex == 1) {
+        return warpHypersphereCore(p, geometryIndex, mouseDelta);
+    }
+    if (coreIndex == 2) {
+        return warpHypertetraCore(p, geometryIndex, mouseDelta);
+    }
+    return p;
+}
+// ========================================
+
 // Complex 3D Lattice Functions - Superior Quantum Shaders
 float tetrahedronLattice(vec3 p, float gridSize) {
     vec3 q = fract(p * gridSize) - 0.5;
@@ -415,38 +481,44 @@ float crystalLattice(vec3 p, float gridSize) {
     return max(crystal, faces * 0.5);
 }
 
-// Enhanced geometry function with holographic effects
+// Enhanced geometry function with holographic effects (24 GEOMETRIES)
 float geometryFunction(vec4 p) {
-    int geomType = int(u_geometry);
+    // Decode geometry: base = geometry % 8 (supports 24 geometries)
+    float totalBase = 8.0;
+    float baseGeomFloat = mod(u_geometry, totalBase);
+    int geomType = int(clamp(floor(baseGeomFloat + 0.5), 0.0, totalBase - 1.0));
+
+    // Project to 3D and apply polytope warp
     vec3 p3d = project4Dto3D(p);
+    vec3 warped = applyCoreWarp(p3d, u_geometry, vec2(0.0, 0.0));
     float gridSize = u_gridDensity * 0.08;
     
     if (geomType == 0) {
-        return tetrahedronLattice(p3d, gridSize) * u_morphFactor;
+        return tetrahedronLattice(warped, gridSize) * u_morphFactor;
     }
     else if (geomType == 1) {
-        return hypercubeLattice(p3d, gridSize) * u_morphFactor;
+        return hypercubeLattice(warped, gridSize) * u_morphFactor;
     }
     else if (geomType == 2) {
-        return sphereLattice(p3d, gridSize) * u_morphFactor;
+        return sphereLattice(warped, gridSize) * u_morphFactor;
     }
     else if (geomType == 3) {
-        return torusLattice(p3d, gridSize) * u_morphFactor;
+        return torusLattice(warped, gridSize) * u_morphFactor;
     }
     else if (geomType == 4) {
-        return kleinLattice(p3d, gridSize) * u_morphFactor;
+        return kleinLattice(warped, gridSize) * u_morphFactor;
     }
     else if (geomType == 5) {
-        return fractalLattice(p3d, gridSize) * u_morphFactor;
+        return fractalLattice(warped, gridSize) * u_morphFactor;
     }
     else if (geomType == 6) {
-        return waveLattice(p3d, gridSize) * u_morphFactor;
+        return waveLattice(warped, gridSize) * u_morphFactor;
     }
     else if (geomType == 7) {
-        return crystalLattice(p3d, gridSize) * u_morphFactor;
+        return crystalLattice(warped, gridSize) * u_morphFactor;
     }
     else {
-        return hypercubeLattice(p3d, gridSize) * u_morphFactor;
+        return hypercubeLattice(warped, gridSize) * u_morphFactor;
     }
 }
 

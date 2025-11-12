@@ -166,9 +166,15 @@ function randomizeGeometryAndHue() {
 window.resetAll = function() {
     // Reset all sliders to defaults
     const defaults = {
+        // 3D Space Rotations
+        rot4dXY: 0,
+        rot4dXZ: 0,
+        rot4dYZ: 0,
+        // 4D Hyperspace Rotations
         rot4dXW: 0,
         rot4dYW: 0,
         rot4dZW: 0,
+        // Visual Parameters
         gridDensity: 15,
         morphFactor: 1,
         chaos: 0.2,
@@ -177,7 +183,7 @@ window.resetAll = function() {
         intensity: 0.5,
         saturation: 0.8
     };
-    
+
     Object.entries(defaults).forEach(([id, value]) => {
         const slider = document.getElementById(id);
         if (slider) {

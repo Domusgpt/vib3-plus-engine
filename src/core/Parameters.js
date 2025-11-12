@@ -36,6 +36,11 @@ export class ParameterManager {
         // Parameter definitions for validation and UI
         this.parameterDefs = {
             variation: { min: 0, max: 99, step: 1, type: 'int' },
+            // 3D Space Rotations
+            rot4dXY: { min: -6.28, max: 6.28, step: 0.01, type: 'float' },
+            rot4dXZ: { min: -6.28, max: 6.28, step: 0.01, type: 'float' },
+            rot4dYZ: { min: -6.28, max: 6.28, step: 0.01, type: 'float' },
+            // 4D Hyperspace Rotations
             rot4dXW: { min: -2, max: 2, step: 0.01, type: 'float' },
             rot4dYW: { min: -2, max: 2, step: 0.01, type: 'float' },
             rot4dZW: { min: -2, max: 2, step: 0.01, type: 'float' },
@@ -47,7 +52,7 @@ export class ParameterManager {
             hue: { min: 0, max: 360, step: 1, type: 'int' },
             intensity: { min: 0, max: 1, step: 0.01, type: 'float' },
             saturation: { min: 0, max: 1, step: 0.01, type: 'float' },
-            geometry: { min: 0, max: 7, step: 1, type: 'int' }
+            geometry: { min: 0, max: 23, step: 1, type: 'int' }
         };
         
         // Default parameter backup for reset
@@ -210,16 +215,22 @@ export class ParameterManager {
      * Randomize all parameters
      */
     randomizeAll() {
+        // 3D Space Rotations
+        this.params.rot4dXY = Math.random() * 12.56 - 6.28;
+        this.params.rot4dXZ = Math.random() * 12.56 - 6.28;
+        this.params.rot4dYZ = Math.random() * 12.56 - 6.28;
+        // 4D Hyperspace Rotations
         this.params.rot4dXW = Math.random() * 4 - 2;
         this.params.rot4dYW = Math.random() * 4 - 2;
         this.params.rot4dZW = Math.random() * 4 - 2;
+        // Visual Parameters
         this.params.dimension = 3.0 + Math.random() * 1.5;
         this.params.gridDensity = 4 + Math.random() * 26;
         this.params.morphFactor = Math.random() * 2;
         this.params.chaos = Math.random();
         this.params.speed = 0.1 + Math.random() * 2.9;
         this.params.hue = Math.random() * 360;
-        this.params.geometry = Math.floor(Math.random() * 8);
+        this.params.geometry = Math.floor(Math.random() * 24);
     }
     
     /**
