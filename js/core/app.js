@@ -3,7 +3,14 @@
  * Handles system switching, UI coordination, and global state management
  */
 
+/**
+ * Main application controller for VIB34D.
+ * Handles system switching, UI coordination, and global state management.
+ */
 export class VIB34DApp {
+    /**
+     * Initializes the application with default values.
+     */
     constructor() {
         this.currentSystem = 'faceted';
         this.userParameterState = {};
@@ -13,8 +20,15 @@ export class VIB34DApp {
         this.setupGlobalFunctions();
     }
 
+    /**
+     * Sets up global functions for the application.
+     */
     setupGlobalFunctions() {
-        // System switching function
+        /**
+         * Switches the current visualization system.
+         * @param {string} system - The name of the system to switch to.
+         * @returns {Promise<void>}
+         */
         window.switchSystem = async (system) => {
             console.log(`🎯 switchSystem called with: ${system}`);
             
@@ -77,7 +91,10 @@ export class VIB34DApp {
             console.error(`💥 CanvasManager failed for ${system} - system may not work properly`);
         };
 
-        // Geometry selection function
+        /**
+         * Selects a geometry by its index.
+         * @param {number} index - The index of the geometry to select.
+         */
         window.selectGeometry = (index) => {
             document.querySelectorAll('.geom-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.index == index);
@@ -91,7 +108,11 @@ export class VIB34DApp {
         // Parameter sync system - UI Controls Master Strategy
         window.userParameterState = this.userParameterState;
         
-        // Enhanced parameter update that preserves user intent
+        /**
+         * Enhanced parameter update that preserves user intent.
+         * @param {string} param - The name of the parameter to update.
+         * @param {any} value - The new value for the parameter.
+         */
         window.enhancedUpdateParameter = (param, value) => {
             // Store user's parameter choice
             this.userParameterState[param] = parseFloat(value);
@@ -103,7 +124,10 @@ export class VIB34DApp {
             }
         };
         
-        // Get all current UI parameter values (prefers user-stored values)
+        /**
+         * Gets the current UI parameter state.
+         * @returns {object} An object containing the current UI parameter state.
+         */
         window.getCurrentUIParameterState = () => {
             const parameterIds = [
                 'rot4dXW', 'rot4dYW', 'rot4dZW', 
@@ -129,7 +153,9 @@ export class VIB34DApp {
             return currentState;
         };
 
-        // Sync sliders to stored values
+        /**
+         * Syncs the sliders to the stored values.
+         */
         window.syncSlidersToStoredValues = () => {
             console.log('🔄 Syncing sliders to stored values...');
             
@@ -151,7 +177,11 @@ export class VIB34DApp {
             });
         };
 
-        // Function to sync visualizer to UI state
+        /**
+         * Syncs the visualizer to the UI state.
+         * @param {string} systemName - The name of the system to sync.
+         * @param {object} engine - The engine of the system to sync.
+         */
         window.syncVisualizerToUI = (systemName, engine) => {
             console.log(`🔄 Syncing ${systemName} visualizer to UI state...`);
             
@@ -169,7 +199,10 @@ export class VIB34DApp {
             console.log(`✅ ${systemName} visualizer synced to UI`);
         };
         
-        // Device Tilt Functions for 4D Rotation Control
+        /**
+         * Toggles device tilt control for 4D rotation.
+         * @returns {Promise<boolean>} A promise that resolves to true if device tilt is enabled, and false otherwise.
+         */
         window.toggleDeviceTilt = async () => {
             if (!window.deviceTiltHandler) {
                 console.warn('🎯 Device tilt handler not available');
@@ -205,7 +238,9 @@ export class VIB34DApp {
             }
         };
         
-        // Update base rotations for tilt system when parameters change
+        /**
+         * Updates the base rotations for the tilt system when parameters change.
+         */
         window.updateTiltBaseRotations = () => {
             if (window.deviceTiltHandler && this.userParameterState) {
                 window.deviceTiltHandler.updateBaseRotation(
@@ -217,7 +252,10 @@ export class VIB34DApp {
         };
     }
 
-    // Initialize the application
+    /**
+     * Initializes the application.
+     * @returns {Promise<void>}
+     */
     async initialize() {
         console.log('🚀 Initializing VIB34D Application...');
         
@@ -272,18 +310,28 @@ export class VIB34DApp {
         }
     }
 
-    // Get current system state
+    /**
+     * Gets the current system state.
+     * @returns {string} The name of the current system.
+     */
     getCurrentSystem() {
         return this.currentSystem;
     }
 
-    // Update parameter in user state
+    /**
+     * Updates a parameter in the user state.
+     * @param {string} param - The name of the parameter to update.
+     * @param {any} value - The new value for the parameter.
+     */
     updateParameter(param, value) {
         this.userParameterState[param] = parseFloat(value);
         console.log(`💾 Parameter updated: ${param} = ${value}`);
     }
 
-    // Get current parameter state
+    /**
+     * Gets the current parameter state.
+     * @returns {object} An object containing the current parameter state.
+     */
     getParameterState() {
         return { ...this.userParameterState };
     }
