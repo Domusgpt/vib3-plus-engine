@@ -1,4 +1,13 @@
 // src/core/EnhancedPolychoraSystem.js
+import { Hexacosichoron } from '../geometry/Hexacosichoron.js';
+
+/**
+ * A Paul Phillips Manifestation
+ * Enhanced 4D Polychora Visualization System
+ *
+ * © 2025 Paul Phillips - Clear Seas Solutions LLC
+ */
+
 class EnhancedPolychoraSystem {
   constructor(gl, canvasManager) {
     this.gl = gl;
@@ -512,43 +521,22 @@ class EnhancedPolychoraSystem {
   }
 
   create600Cell() {
-    // Simplified 600-cell
-    const phi = (1 + Math.sqrt(5)) / 2;
-    const vertices = [];
-    const colors = [];
-    
-    // Use permutations of (±1, ±1, ±1, ±1) and golden ratio coordinates
-    for (let i = 0; i < 16; i++) {
-      vertices.push(
-        (i & 1) ? 1 : -1,
-        (i & 2) ? 1 : -1,
-        (i & 4) ? 1 : -1,
-        (i & 8) ? 1 : -1
-      );
-      
-      colors.push(
-        0.3 + 0.7 * ((i & 1) ? 1 : 0),
-        0.3 + 0.7 * ((i & 2) ? 1 : 0),
-        0.3 + 0.7 * ((i & 4) ? 1 : 0),
-        0.9
-      );
-    }
-    
-    const indices = [];
-    for (let i = 0; i < 16; i++) {
-      for (let j = i + 1; j < 16; j++) {
-        const diff = i ^ j;
-        if ((diff & (diff - 1)) === 0) { // One bit difference
-          indices.push(i, j);
-        }
-      }
-    }
-    
+    // ✨ PROPER HEXACOSICHORON (600-cell) IMPLEMENTATION ✨
+    // 120 vertices, 720 edges, using golden ratio coordinates
+    // This is the mathematically accurate implementation
+
+    const hexacosichoron = new Hexacosichoron();
+    const geometry = hexacosichoron.getGeometryData();
+
+    console.log('🌟 Hexacosichoron loaded:', geometry.description);
+    console.log('📊 Statistics:', hexacosichoron.getStatistics());
+
     return {
-      vertices: new Float32Array(vertices),
-      colors: new Float32Array(colors),
-      indices: new Uint16Array(indices),
-      vertexCount: 16
+      vertices: geometry.vertices,
+      colors: geometry.colors,
+      indices: geometry.indices,
+      vertexCount: geometry.vertexCount,
+      metadata: hexacosichoron.getStatistics()
     };
   }
 

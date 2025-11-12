@@ -165,7 +165,7 @@ export class FacetedSystem {
                 return pos;
             }
 
-            // Base geometry SDFs (0-7)
+            // Base geometry SDFs (0-8) - ✨ EXPANDED with Hexacosichoron
             float baseGeometry(vec4 p, float type) {
                 if (type < 0.5) {
                     // Tetrahedron
@@ -192,10 +192,50 @@ export class FacetedSystem {
                 } else if (type < 6.5) {
                     // Wave
                     return abs(p.z - sin(p.x * 5.0 + u_time) * cos(p.y * 5.0 + u_time) * 0.3) - 0.1;
-                } else {
+                } else if (type < 7.5) {
                     // Crystal
                     vec4 q = abs(p);
                     return max(max(max(q.x, q.y), q.z), q.w) - 0.8;
+                } else {
+                    // 🌟 HEXACOSICHORON (600-CELL) - Golden Ratio 4D Polytope
+                    // Icosahedral symmetry with golden ratio proportions
+                    float phi = 1.618034;  // Golden ratio
+                    float invPhi = 0.618034;  // 1/φ
+
+                    // Approximate 600-cell using icosahedral symmetry
+                    // The 600-cell has 120 vertices arranged with icosahedral symmetry
+
+                    // Create icosahedral distance field using golden ratio
+                    float ico = 0.0;
+
+                    // Five-fold symmetry around main axes (characteristic of 600-cell)
+                    for(int i = 0; i < 5; i++) {
+                        float angle = float(i) * 1.2566;  // 2π/5
+                        float c = cos(angle);
+                        float s = sin(angle);
+
+                        // Rotate in XY plane with golden ratio scaling
+                        vec4 rotP = vec4(
+                            p.x * c - p.y * s,
+                            p.x * s + p.y * c,
+                            p.z,
+                            p.w
+                        );
+
+                        // Distance to rotated golden ratio planes
+                        float planeDist = abs(dot(rotP, vec4(phi, 1.0, 0.0, invPhi)));
+                        ico = max(ico, 1.0 - planeDist * 0.8);
+                    }
+
+                    // Add tetrahedral cell structure (600-cell is made of 600 tetrahedra)
+                    float tetField = max(max(max(
+                        abs(p.x + p.y) - p.z - p.w,
+                        abs(p.x - p.y) - p.z + p.w),
+                        abs(p.x + p.y) + p.z - p.w),
+                        abs(p.x - p.y) + p.z + p.w) / sqrt(4.0);
+
+                    // Combine icosahedral and tetrahedral structures
+                    return max(length(p) - 1.1, min(ico * 0.4 - 0.3, tetField));
                 }
             }
 
@@ -217,17 +257,17 @@ export class FacetedSystem {
                 return max(baseShape, tetraField);  // Intersection
             }
 
-            // Main geometry dispatcher (0-23)
+            // Main geometry dispatcher (0-26) - ✨ EXPANDED with Hexacosichoron
             float geometry(vec4 p, float type) {
-                if (type < 8.0) {
-                    // Base geometries (0-7)
+                if (type < 9.0) {
+                    // Base geometries (0-8) - includes Hexacosichoron at 8
                     return baseGeometry(p, type);
-                } else if (type < 16.0) {
-                    // Hypersphere Core (8-15)
-                    return hypersphereCore(p, type - 8.0);
+                } else if (type < 18.0) {
+                    // Hypersphere Core (9-17)
+                    return hypersphereCore(p, type - 9.0);
                 } else {
-                    // Hypertetrahedron Core (16-23)
-                    return hypertetrahedronCore(p, type - 16.0);
+                    // Hypertetrahedron Core (18-26)
+                    return hypertetrahedronCore(p, type - 18.0);
                 }
             }
 

@@ -308,7 +308,7 @@ export class HolographicVisualizer {
             }
 
             vec3 applyCoreWarp(vec3 p, float geometryType, vec2 mouseDelta) {
-                float totalBase = 8.0;
+                float totalBase = 9.0;  // ✨ EXPANDED from 8 to include Hexacosichoron
                 float coreFloat = floor(geometryType / totalBase);
                 int coreIndex = int(clamp(coreFloat, 0.0, 2.0));
                 float baseGeomFloat = geometryType - floor(geometryType / totalBase) * totalBase;
@@ -432,18 +432,49 @@ export class HolographicVisualizer {
                 float d = max(max(abs(q.x), abs(q.y)), abs(q.z));
                 return 1.0 - smoothstep(0.3, 0.5, d);
             }
-            
+
+            // 🌟 HEXACOSICHORON (600-CELL) LATTICE - Paul Phillips Manifestation
+            float hexacosichoronLattice(vec3 p, float gridSize) {
+                vec3 cell = fract(p * gridSize) - 0.5;
+                float phi = 1.618034;
+                float invPhi = 1.0 / phi;
+
+                float vertices = 0.0;
+
+                // Golden ratio vertices
+                vertices = max(vertices, 1.0 - smoothstep(0.0, 0.05, length(cell - vec3(phi * 0.3, invPhi * 0.3, 0.0))));
+                vertices = max(vertices, 1.0 - smoothstep(0.0, 0.05, length(cell - vec3(invPhi * 0.3, 0.0, phi * 0.3))));
+                vertices = max(vertices, 1.0 - smoothstep(0.0, 0.05, length(cell - vec3(0.0, phi * 0.3, invPhi * 0.3))));
+
+                // Edge network
+                float edges = 0.0;
+                edges = max(edges, 1.0 - smoothstep(0.0, 0.018, abs(length(cell.xy) - phi * 0.2)));
+                edges = max(edges, 1.0 - smoothstep(0.0, 0.018, abs(length(cell.yz) - phi * 0.18)));
+
+                // Pentagonal pattern (icosahedral symmetry)
+                for(int i = 0; i < 5; i++) {
+                    float angle = float(i) * 1.2566;
+                    vec2 pent = vec2(cos(angle), sin(angle)) * phi * 0.25;
+                    vertices = max(vertices, 1.0 - smoothstep(0.0, 0.04, length(cell.xy - pent)));
+                }
+
+                // Holographic interference with golden ratio
+                float interference = sin(length(cell) * 12.0 * phi + u_time) * 0.12;
+
+                return max(vertices, edges * 0.75) + interference;
+            }
+
             float getDynamicGeometry(vec3 p, float gridSize, float geometryType) {
-                // Apply polytope core warp transformation (24-geometry system)
+                // Apply polytope core warp transformation (27-geometry system - NOW WITH HEXACOSICHORON!)
                 vec3 warped = applyCoreWarp(p, geometryType, vec2(0.0, 0.0));
 
                 // WebGL 1.0 compatible modulus replacement - decode base geometry
-                float baseGeomFloat = geometryType - floor(geometryType / 8.0) * 8.0;
+                float baseGeomFloat = geometryType - floor(geometryType / 9.0) * 9.0;  // ✨ EXPANDED to 9
                 int baseGeom = int(baseGeomFloat);
-                float variation = floor(geometryType / 8.0) / 4.0;
+                float variation = floor(geometryType / 9.0) / 4.0;
                 float variedGridSize = gridSize * (0.5 + variation * 1.5);
 
-                // Call lattice functions with warped point (enables 24 geometry variants)
+                // Call lattice functions with warped point (enables 27 geometry variants)
                 if (baseGeom == 0) return tetrahedronLattice(warped, variedGridSize);
                 else if (baseGeom == 1) return hypercubeLattice(warped, variedGridSize);
                 else if (baseGeom == 2) return sphereLattice(warped, variedGridSize);
@@ -451,6 +482,8 @@ export class HolographicVisualizer {
                 else if (baseGeom == 4) return kleinLattice(warped, variedGridSize);
                 else if (baseGeom == 5) return fractalLattice(warped, variedGridSize);
                 else if (baseGeom == 6) return waveLattice(warped, variedGridSize);
+                else if (baseGeom == 7) return crystalLattice(warped, variedGridSize);
+                else if (baseGeom == 8) return hexacosichoronLattice(warped, variedGridSize);  // 🌟 600-CELL!
                 else return crystalLattice(warped, variedGridSize);
             }
             

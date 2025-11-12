@@ -349,7 +349,7 @@ vec3 warpHypertetraCore(vec3 p, int geometryIndex, vec2 mouseDelta) {
 }
 
 vec3 applyCoreWarp(vec3 p, float geometryType, vec2 mouseDelta) {
-    float totalBase = 8.0;
+    float totalBase = 9.0;  // ✨ EXPANDED from 8 to include Hexacosichoron
     float coreFloat = floor(geometryType / totalBase);
     int coreIndex = int(clamp(coreFloat, 0.0, 2.0));
     float baseGeomFloat = mod(geometryType, totalBase);
@@ -467,24 +467,106 @@ float waveLattice(vec3 p, float gridSize) {
 
 float crystalLattice(vec3 p, float gridSize) {
     vec3 cell = fract(p * gridSize) - 0.5;
-    
+
     // Octahedral crystal structure
     float crystal = max(max(abs(cell.x) + abs(cell.y), abs(cell.y) + abs(cell.z)), abs(cell.x) + abs(cell.z));
     crystal = 1.0 - smoothstep(0.3, 0.4, crystal);
-    
+
     // Add crystalline faces
     float faces = 0.0;
     faces = max(faces, 1.0 - smoothstep(0.0, 0.02, abs(abs(cell.x) - 0.35)));
     faces = max(faces, 1.0 - smoothstep(0.0, 0.02, abs(abs(cell.y) - 0.35)));
     faces = max(faces, 1.0 - smoothstep(0.0, 0.02, abs(abs(cell.z) - 0.35)));
-    
+
     return max(crystal, faces * 0.5);
 }
 
-// Enhanced geometry function with holographic effects (24 GEOMETRIES)
+// 🌟 HEXACOSICHORON (600-CELL) LATTICE - Paul Phillips Manifestation
+// Golden ratio-based 4D polytope with 120 vertices, 720 edges, 1200 faces, 600 cells
+float hexacosichoronLattice(vec3 p, float gridSize) {
+    vec3 cell = fract(p * gridSize) - 0.5;
+
+    // Golden ratio φ = (1 + √5)/2 ≈ 1.618
+    float phi = 1.618034;
+    float invPhi = 1.0 / phi;  // 1/φ ≈ 0.618
+
+    // The 600-cell has vertices based on 3 groups using golden ratio coordinates:
+    // Group 1: (±1, ±1, ±1) with even # of minus signs - creates 8 vertices
+    // Group 2: Permutations of (0, 0, ±φ, ±1/φ) - creates 96 vertices
+    // Group 3: Permutations of (±φ, ±1, 0, 0) - creates 16 vertices
+
+    // Since we're in 3D space, we'll create a 3D projection of key vertex positions
+    float vertices = 0.0;
+
+    // Core vertices at golden ratio positions
+    float v1 = length(cell - vec3(phi * 0.3, invPhi * 0.3, 0.0));
+    float v2 = length(cell - vec3(invPhi * 0.3, 0.0, phi * 0.3));
+    float v3 = length(cell - vec3(0.0, phi * 0.3, invPhi * 0.3));
+    float v4 = length(cell - vec3(-phi * 0.3, -invPhi * 0.3, 0.0));
+    float v5 = length(cell - vec3(-invPhi * 0.3, 0.0, -phi * 0.3));
+    float v6 = length(cell - vec3(0.0, -phi * 0.3, -invPhi * 0.3));
+
+    // Additional vertices for richer structure
+    float v7 = length(cell - vec3(phi * 0.25, 0.0, invPhi * 0.25));
+    float v8 = length(cell - vec3(0.0, invPhi * 0.25, phi * 0.25));
+    float v9 = length(cell - vec3(invPhi * 0.25, phi * 0.25, 0.0));
+
+    // Combine vertex distances with smoothstep
+    vertices = max(vertices, 1.0 - smoothstep(0.0, 0.05, min(min(v1, v2), v3)));
+    vertices = max(vertices, 1.0 - smoothstep(0.0, 0.05, min(min(v4, v5), v6)));
+    vertices = max(vertices, 1.0 - smoothstep(0.0, 0.045, min(min(v7, v8), v9)));
+
+    // Edge network connecting vertices
+    float edges = 0.0;
+
+    // Circular edges at golden ratio radii (600-cell has icosahedral symmetry)
+    float r1 = abs(length(cell.xy) - phi * 0.2);
+    float r2 = abs(length(cell.yz) - phi * 0.18);
+    float r3 = abs(length(cell.xz) - phi * 0.22);
+
+    edges = max(edges, 1.0 - smoothstep(0.0, 0.018, r1));
+    edges = max(edges, 1.0 - smoothstep(0.0, 0.018, r2));
+    edges = max(edges, 1.0 - smoothstep(0.0, 0.018, r3));
+
+    // Pentagonal/icosahedral edge patterns (600-cell cells are tetrahedra arranged icosahedrally)
+    float angleStep = 6.283185 / 5.0;  // Pentagon
+    for(int i = 0; i < 5; i++) {
+        float angle = float(i) * angleStep;
+        vec2 pentVert = vec2(cos(angle), sin(angle)) * phi * 0.25;
+        float pentDist = length(cell.xy - pentVert);
+        vertices = max(vertices, 1.0 - smoothstep(0.0, 0.04, pentDist));
+    }
+
+    // Tetrahedral cell structure - 600-cell is made of 600 tetrahedra
+    vec3 tetCenter1 = vec3(0.2, 0.2, 0.2);
+    vec3 tetCenter2 = vec3(-0.2, -0.2, 0.2);
+    vec3 tetCenter3 = vec3(-0.2, 0.2, -0.2);
+    vec3 tetCenter4 = vec3(0.2, -0.2, -0.2);
+
+    float tet1 = length(cell - tetCenter1);
+    float tet2 = length(cell - tetCenter2);
+    float tet3 = length(cell - tetCenter3);
+    float tet4 = length(cell - tetCenter4);
+
+    float tetCells = 1.0 - smoothstep(0.15, 0.2, min(min(tet1, tet2), min(tet3, tet4)));
+
+    // Holographic interference using golden ratio phase
+    float time = u_time * 0.001 * u_speed;
+    float interference = sin(length(cell) * 12.0 * phi + time) *
+                        cos(cell.x * 8.0 * invPhi - time * 0.8) *
+                        sin(cell.y * 10.0 * phi - time * 0.6) * 0.12;
+
+    // Volumetric density falloff (brighter at center)
+    float glow = exp(-length(cell) * 2.2) * 0.18;
+
+    // Combine all elements
+    return max(max(vertices, edges * 0.75), tetCells * 0.4) + interference + glow;
+}
+
+// Enhanced geometry function with holographic effects (27 GEOMETRIES - NOW WITH HEXACOSICHORON!)
 float geometryFunction(vec4 p) {
-    // Decode geometry: base = geometry % 8 (supports 24 geometries)
-    float totalBase = 8.0;
+    // Decode geometry: base = geometry % 9 (supports 27 geometries: 9 base × 3 cores)
+    float totalBase = 9.0;  // ✨ EXPANDED from 8 to include Hexacosichoron
     float baseGeomFloat = mod(u_geometry, totalBase);
     int geomType = int(clamp(floor(baseGeomFloat + 0.5), 0.0, totalBase - 1.0));
 
@@ -492,7 +574,7 @@ float geometryFunction(vec4 p) {
     vec3 p3d = project4Dto3D(p);
     vec3 warped = applyCoreWarp(p3d, u_geometry, vec2(0.0, 0.0));
     float gridSize = u_gridDensity * 0.08;
-    
+
     if (geomType == 0) {
         return tetrahedronLattice(warped, gridSize) * u_morphFactor;
     }
@@ -516,6 +598,10 @@ float geometryFunction(vec4 p) {
     }
     else if (geomType == 7) {
         return crystalLattice(warped, gridSize) * u_morphFactor;
+    }
+    else if (geomType == 8) {
+        // 🌟 HEXACOSICHORON (600-CELL) - Golden ratio 4D polytope
+        return hexacosichoronLattice(warped, gridSize) * u_morphFactor;
     }
     else {
         return hypercubeLattice(warped, gridSize) * u_morphFactor;
