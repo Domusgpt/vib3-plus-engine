@@ -1,15 +1,15 @@
 /**
  * VIB34D Geometry Tab System
- * 8 Base Geometries + 3 Core Types = 24 Total Geometries
+ * 9 Base Geometries + 3 Core Types = 27 Total Geometries
  *
- * Formula: geometry = coreIndex * 8 + baseIndex
+ * Formula: geometry = coreIndex * 9 + baseIndex
  *
  * Core Types:
- * - Base (coreIndex = 0): Geometries 0-7
- * - Hypersphere Core (coreIndex = 1): Geometries 8-15
- * - Hypertetrahedron Core (coreIndex = 2): Geometries 16-23
+ * - Base (coreIndex = 0): Geometries 0-8
+ * - Hypersphere Core (coreIndex = 1): Geometries 9-17
+ * - Hypertetrahedron Core (coreIndex = 2): Geometries 18-26
  *
- * Base Geometries (baseIndex 0-7):
+ * Base Geometries (baseIndex 0-8):
  * 0: Tetrahedron
  * 1: Hypercube
  * 2: Sphere
@@ -18,12 +18,13 @@
  * 5: Fractal
  * 6: Wave
  * 7: Crystal
+ * 8: Hexacosichoron 🌟 (600-cell - Golden Ratio 4D Polytope)
  */
 
 // State
 let activeCoreIndex = 0; // 0 = base, 1 = hypersphere, 2 = hypertetra
-let activeBaseIndex = 0; // 0-7
-let activeGeometry = 0; // Combined index 0-23
+let activeBaseIndex = 0; // 0-8
+let activeGeometry = 0; // Combined index 0-26
 
 // Core type definitions
 const CORE_TYPES = {
@@ -32,21 +33,21 @@ const CORE_TYPES = {
         name: 'Base',
         icon: '🔷',
         color: '#00ffff',
-        range: '0-7'
+        range: '0-8'
     },
     hypersphere: {
         index: 1,
         name: 'Hypersphere',
         icon: '🌀',
         color: '#ff00ff',
-        range: '8-15'
+        range: '9-17'
     },
     hypertetra: {
         index: 2,
         name: 'Hypertetra',
         icon: '🔺',
         color: '#ff8800',
-        range: '16-23'
+        range: '18-26'
     }
 };
 
@@ -59,7 +60,8 @@ const BASE_GEOMETRIES = [
     { name: 'Klein Bottle', icon: '🫙' },
     { name: 'Fractal', icon: '❄️' },
     { name: 'Wave', icon: '🌊' },
-    { name: 'Crystal', icon: '💎' }
+    { name: 'Crystal', icon: '💎' },
+    { name: 'Hexacosichoron', icon: '🌟' } // 600-cell
 ];
 
 /**
@@ -77,7 +79,7 @@ window.initGeometryTabs = function() {
     selectGeometryButton(0);
 
     console.log('✅ Geometry Tab System initialized');
-    console.log(`📐 24 geometries available: 8 base × 3 core types`);
+    console.log(`📐 27 geometries available: 9 base × 3 core types (includes Hexacosichoron!)`);
 };
 
 /**
@@ -169,8 +171,8 @@ window.switchCoreType = function(coreKey) {
  * Select a geometry button (base geometry 0-7)
  */
 window.selectGeometryButton = function(baseIndex) {
-    if (baseIndex < 0 || baseIndex > 7) {
-        console.error(`❌ Invalid base index: ${baseIndex} (must be 0-7)`);
+    if (baseIndex < 0 || baseIndex > 8) {
+        console.error(`❌ Invalid base index: ${baseIndex} (must be 0-8)`);
         return;
     }
 
@@ -193,18 +195,18 @@ window.selectGeometryButton = function(baseIndex) {
 
 /**
  * Calculate combined geometry index and apply to engine
- * Formula: geometry = coreIndex * 8 + baseIndex
+ * Formula: geometry = coreIndex * 9 + baseIndex
  */
 function calculateAndApplyGeometry() {
     // Calculate combined index
-    activeGeometry = activeCoreIndex * 8 + activeBaseIndex;
+    activeGeometry = activeCoreIndex * 9 + activeBaseIndex;
 
     const coreName = Object.values(CORE_TYPES).find(c => c.index === activeCoreIndex)?.name;
     const baseName = BASE_GEOMETRIES[activeBaseIndex]?.name;
 
     console.log(`🧮 Calculated geometry index: ${activeGeometry}`);
-    console.log(`   = ${coreName} (${activeCoreIndex}) × 8 + ${baseName} (${activeBaseIndex})`);
-    console.log(`   = ${activeCoreIndex * 8} + ${activeBaseIndex} = ${activeGeometry}`);
+    console.log(`   = ${coreName} (${activeCoreIndex}) × 9 + ${baseName} (${activeBaseIndex})`);
+    console.log(`   = ${activeCoreIndex * 9} + ${activeBaseIndex} = ${activeGeometry}`);
 
     // Apply to engine
     if (window.selectGeometry) {
@@ -239,16 +241,16 @@ function updateGeometryDisplay() {
  * Used when loading from gallery or external sources
  */
 window.loadGeometryFromIndex = function(geometryIndex) {
-    if (geometryIndex < 0 || geometryIndex > 23) {
-        console.error(`❌ Invalid geometry index: ${geometryIndex} (must be 0-23)`);
+    if (geometryIndex < 0 || geometryIndex > 26) {
+        console.error(`❌ Invalid geometry index: ${geometryIndex} (must be 0-26)`);
         return;
     }
 
     console.log(`📂 Loading geometry from index: ${geometryIndex}`);
 
-    // Decode: coreIndex = floor(geometryIndex / 8), baseIndex = geometryIndex % 8
-    const coreIndex = Math.floor(geometryIndex / 8);
-    const baseIndex = geometryIndex % 8;
+    // Decode: coreIndex = floor(geometryIndex / 9), baseIndex = geometryIndex % 9
+    const coreIndex = Math.floor(geometryIndex / 9);
+    const baseIndex = geometryIndex % 9;
 
     console.log(`   Decoded: core=${coreIndex}, base=${baseIndex}`);
 
@@ -300,11 +302,11 @@ document.addEventListener('keydown', (e) => {
         }
     }
 
-    // Alt + Q,W,E,R,A,S,D,F: Select base geometries 0-7
+    // Alt + Q,W,E,R,T,A,S,D,F: Select base geometries 0-8
     if (e.altKey) {
         const keyMap = {
-            'q': 0, 'w': 1, 'e': 2, 'r': 3,
-            'a': 4, 's': 5, 'd': 6, 'f': 7
+            'q': 0, 'w': 1, 'e': 2, 'r': 3, 't': 4,
+            'a': 5, 's': 6, 'd': 7, 'f': 8
         };
         const baseIndex = keyMap[e.key.toLowerCase()];
         if (baseIndex !== undefined) {
@@ -329,4 +331,4 @@ window.addEventListener('DOMContentLoaded', () => {
 console.log('📐 Geometry Tabs Module: Loaded');
 console.log('⌨️ Keyboard Shortcuts:');
 console.log('  - Alt + 1-3: Switch core types');
-console.log('  - Alt + Q,W,E,R,A,S,D,F: Select geometries 0-7');
+console.log('  - Alt + Q,W,E,R,T,A,S,D,F: Select geometries 0-8 (F = Hexacosichoron!)');
